@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#141414</color>
+    <color name="text">#DEDEDE</color>
+    <color name="menuBar">#333333</color>
+    <color name="primary">#0080FF</color>
+    <color name="secondary">#0058BF</color>
+</resources>

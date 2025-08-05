@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2C2C2C"
+    android:background="?android:colorBackground"
     tools:context=".MainActivity">
 
     <TextView
@@ -53,19 +53,81 @@
             android:id="@+id/songVolumeLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            app:layout_constraintTop_toBottomOf="@+id/songVolumeBar"
-            tools:layout_editor_absoluteX="71dp" />
+            android:text="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ambienceVolumeBar"
+            app:layout_constraintStart_toStartOf="@+id/ambienceVolumeBar"
+            app:layout_constraintTop_toBottomOf="@+id/songVolumeBar" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottomAppBar"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pageSelector"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:backgroundTint="#3A3A3A"
+        android:layout_height="78dp"
+        android:layout_marginBottom="4dp"
+        android:background="?attr/colorSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/ambiencePageButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="#00573434"
+            android:contentDescription="@string/ambience_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/homePageButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_myplaces" />
+
+        <ImageButton
+            android:id="@+id/songPageButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/song_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/homePageButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_slideshow" />
+
+        <ImageButton
+            android:id="@+id/homePageButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="#73FFFFFF"
+            android:contentDescription="@string/home_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_preferences" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageButton
+        android:id="@+id/settingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/settings_button"
+        android:onClick="launchSettings"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:srcCompat="@android:drawable/ic_menu_edit" />
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

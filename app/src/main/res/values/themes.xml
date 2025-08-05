@@ -3,6 +3,11 @@
     <style name="Base.Theme.AudioMixer" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="colorSurface">@color/menuBar</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSecondary">@color/secondary</item>
     </style>
 
     <style name="Theme.AudioMixer" parent="Base.Theme.AudioMixer" />
