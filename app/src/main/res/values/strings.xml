@@ -1,14 +1,19 @@
 <resources>
     <string name="app_name">AudioMixer</string>
-    <string name="ambience_button">Ambience page select button</string>
-    <string name="home_button">Home page select button</string>
-    <string name="song_button">Song page select button</string>
     <string name="settings_button">Settings page button</string>
 
     <!--Settings page strings-->
     <string name="settings_general_h">General</string>
-    <string name="settings_dark_mode">Enable dark mode</string>
-    <string name="settings_vibrations">Enable vibrations</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="settings_theme">Select theme:</string>
+    <string-array name="theme_options">
+        <item>System default</item>
+        <item>Light mode</item>
+        <item>Dark mode</item>
+    </string-array>
+    <string name="settings_vibrations">Enable vibrations:</string>
+
+    <string name="settings_audio_h">Audio</string>
+    <string name="settings_song_path">Choose song directory:</string>
+    <string name="settings_path_button">Path</string>
+
 </resources>
