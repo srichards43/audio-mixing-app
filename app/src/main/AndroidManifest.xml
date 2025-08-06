@@ -12,10 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioMixer">
         <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
+            android:name=".activities.SettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -7,6 +7,8 @@
 
     <!--Settings page strings-->
     <string name="settings_general_h">General</string>
-        <string name="settings_dark_mode">Enable dark mode</string>
-        <string name="settings_vibrations">Enable vibrations</string>
+    <string name="settings_dark_mode">Enable dark mode</string>
+    <string name="settings_vibrations">Enable vibrations</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

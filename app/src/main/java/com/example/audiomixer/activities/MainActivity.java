@@ -1,21 +1,26 @@
-package com.example.audiomixer;
+package com.example.audiomixer.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.appbar.MaterialToolbar;
+import com.example.audiomixer.R;
+import com.example.audiomixer.adapters.PagerAdapter;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 public class MainActivity extends AppCompatActivity {
 
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
     /* temp
     SeekBar songVolBar;
     TextView songVolLabel;
@@ -45,19 +50,33 @@ public class MainActivity extends AppCompatActivity {
     */
 
 
-    public void launchSettings(View v) {
-        Intent i = new Intent(this, SettingsActivity.class);
-        startActivity(i);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        setTitle("Home");
+
+        tabLayout = findViewById(R.id.tabLayout);
+        viewPager = findViewById(R.id.viewPager);
+        FragmentManager manager = getSupportFragmentManager();
+        PagerAdapter adapter = new PagerAdapter(manager, getLifecycle());
+        viewPager.setAdapter(adapter);
+
+        viewPager.setCurrentItem(1, false);
+
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            switch (position) {
+                case 0:
+                    tab.setText("Songs");
+                    break;
+                case 1:
+                    tab.setText("Home");
+                    break;
+                case 2:
+                    tab.setText("Ambience");
+                    break;
+            }
+        }).attach();
 
         // Find ids
         /* temp

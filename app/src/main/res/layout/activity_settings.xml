@@ -6,12 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:colorBackground"
-    tools:context=".SettingsActivity">
+    tools:context=".activities.SettingsActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:background="?attr/colorSurface"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
@@ -20,9 +20,10 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:layout_width="409dp"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
@@ -31,11 +32,12 @@
             android:id="@+id/generalHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:text="@string/settings_general_h"
             android:textColor="?android:textColorPrimary"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:translationX="5dp" />
+            android:translationX="0dp" />
 
         <View
             android:id="@+id/view"
@@ -45,13 +47,14 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp">
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp">
 
             <TextView
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:text="@string/settings_dark_mode"
                 android:textColor="?android:textColorPrimary"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -66,18 +69,19 @@
                 app:layout_constraintStart_toEndOf="@+id/textView1"
                 app:layout_constraintTop_toTopOf="parent"
                 app:thumbTint="?attr/colorPrimary"
-                app:trackTint="?attr/colorSecondary" />
+                app:trackTint="@color/switch_track_color" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp">
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp">
 
             <TextView
                 android:id="@+id/textView6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:text="@string/settings_vibrations"
                 android:textColor="?android:textColorPrimary"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -92,7 +96,7 @@
                 app:layout_constraintStart_toEndOf="@+id/textView6"
                 app:layout_constraintTop_toTopOf="parent"
                 app:thumbTint="?attr/colorPrimary"
-                app:trackTint="?attr/colorSecondary" />
+                app:trackTint="@color/switch_track_color" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
