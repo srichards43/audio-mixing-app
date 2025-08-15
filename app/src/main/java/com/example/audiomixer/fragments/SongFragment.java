@@ -1,66 +1,144 @@
 package com.example.audiomixer.fragments;
 
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.audiomixer.R;
+import com.example.audiomixer.adapters.SongAdapter;
+import com.example.audiomixer.objects.AudioFile;
+import com.example.audiomixer.utils.AppPreferences;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SongFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+
 public class SongFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Uri musicDirectory;
+    private RecyclerView recyclerView;
+    private SongAdapter adapter;
 
     public SongFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SongFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SongFragment newInstance(String param1, String param2) {
-        SongFragment fragment = new SongFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        musicDirectory = AppPreferences.getMusicDirectoryUri(this.requireContext());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_song, container, false);
+        View view = inflater.inflate(R.layout.fragment_song, container, false);
+
+        recyclerView = view.findViewById(R.id.songRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        List<AudioFile> songs = loadAudioFiles(musicDirectory);
+        adapter = new SongAdapter(songs);
+        recyclerView.setAdapter(adapter);
+
+        return view;
+    }
+
+    /**
+     * Loads audio files from the music directory
+     * @param directoryUri, the uri of the music directory to search
+     * @return a list of audio files
+     */
+    private List<AudioFile> loadAudioFiles(Uri directoryUri) {
+        List<AudioFile> audioFiles = new ArrayList<>();
+        if (directoryUri == null) return audioFiles;
+
+        DocumentFile directory = DocumentFile.fromTreeUri(requireContext(), directoryUri);
+        if (directory == null) return audioFiles;
+
+        for (DocumentFile file : directory.listFiles()) {
+            if (file.isFile() && Objects.requireNonNull(file.getName()).endsWith(".mp3")) {
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                try {
+                    retriever.setDataSource(requireContext(), file.getUri());
+
+                    String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                    if (!isMetadata(title)) {
+                        title = file.getName();
+                    }
+
+                    String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                    if (!isMetadata(artist)) {
+                        artist = "Unknown";
+                    }
+
+                    String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                    if (!isMetadata(album)) {
+                        album = "Unknown Album";
+                    }
+
+                    String durationString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                    long duration = 0;
+                    if (isMetadata(durationString)) {
+                        try {
+                            duration = Long.parseLong(durationString);
+                        } catch (NumberFormatException ignored) {}
+                    }
+
+                    byte[] albumCover = retriever.getEmbeddedPicture();
+
+                    audioFiles.add(new AudioFile(
+                            title,
+                            artist,
+                            album,
+                            duration,
+                            file.getUri().toString(),
+                            albumCover
+                    ));
+                } catch (Exception e) {
+                    Log.e("SongFragment", "Error loading audio file:", e);
+                    audioFiles.add(new AudioFile(
+                            file.getName(),
+                            "Unknown",
+                            "Unknown",
+                            0,
+                            file.getUri().toString(),
+                            null
+                    ));
+                } finally {
+                    try {
+                        retriever.release();
+                    } catch (IOException e) {
+                        Log.e("SongFragment", "Error releasing retriever:", e);
+                    }
+
+                }
+            }
+        }
+
+        return audioFiles;
+    }
+
+    /**
+     * Helper method for metadata validation
+     * @param metadata, the metadata category to check
+     * @return true if the metadata is not null or empty
+     */
+    private boolean isMetadata(String metadata) {
+        return metadata != null && !metadata.isEmpty();
     }
 }

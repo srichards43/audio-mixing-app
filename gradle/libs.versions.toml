@@ -10,9 +10,9 @@ activity = "1.8.0"
 constraintlayout = "2.1.4"
 coordinatorlayout = "1.3.0"
 viewpager2 = "1.1.0"
+recyclerview = "1.4.0"
 
 [libraries]
-appcompat-v171 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -22,6 +22,9 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 coordinatorlayout = { group = "androidx.coordinatorlayout", name = "coordinatorlayout", version.ref = "coordinatorlayout" }
 viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
+lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version = "2.6.2" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -16,4 +16,7 @@
     <string name="settings_song_path">Choose song directory:</string>
     <string name="settings_path_button">Path</string>
 
+    <!--Song fragment strings-->
+    <string name="path_indicator">Path:</string>
+
 </resources>
