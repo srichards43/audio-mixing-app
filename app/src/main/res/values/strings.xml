@@ -18,5 +18,12 @@
 
     <!--Song fragment strings-->
     <string name="path_indicator">Path:</string>
+    <string-array name="sort_options">
+        <item>Added</item>
+        <item>Title</item>
+        <item>Artist</item>
+        <item>Album</item>
+        <item>Duration</item>
+    </string-array>
 
 </resources>

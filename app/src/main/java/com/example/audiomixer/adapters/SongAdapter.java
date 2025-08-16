@@ -16,7 +16,9 @@ import com.example.audiomixer.R;
 import com.example.audiomixer.objects.AudioFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
 
@@ -43,7 +45,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         AudioFile song = filteredSongs.get(position);
 
         holder.title.setText(song.getTitle());
-        holder.artist.setText(song.getArtist());
+        holder.songInfo.setText(song.getArtist());
+        if (!Objects.equals(song.getAlbum(), "Unknown Album")) {
+            holder.songInfo.append(" • " + song.getAlbum());
+        }
         holder.duration.setText(song.getFormattedDuration());
 
         if (song.getAlbumCover() != null) {
@@ -71,7 +76,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         return filteredSongs.size();
     }
 
-    public void filterSongs(String query) {
+    /**
+     * Filter songs based on a search query, then sort them
+     * @param query, what the user has searched
+     * @param category, category selected in spinner, used in sortSongs() call
+     * @param isAscending, state of sort button, used in eventual sortSongDirection() call
+     */
+    public void filterSongs(String query, String category, boolean isAscending) {
         filteredSongs.clear();
         if (query == null || query.isEmpty()) {
             filteredSongs.addAll(songs);
@@ -85,11 +96,45 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
                 }
             }
         }
+        sortSongs(category, isAscending);
+    }
+
+    /**
+     * Sort songs based on a category selected in the spinner, separated from filterSongs to avoid
+     * unnecessary overhead for spinner select/direction button click
+     * @param category, category to sort by
+     * @param isAscending, state of sort button, used in sortSongDirection() call
+     */
+    public void sortSongs(String category, boolean isAscending) {
+        switch (category) {
+            case "Added" :
+                filteredSongs.sort((o1, o2) -> Long.compare(o1.getCreatedAt(), o2.getCreatedAt()));
+            case "Title" :
+                filteredSongs.sort((o1, o2) -> o1.getTitle().compareToIgnoreCase(o2.getTitle()));
+                break;
+            case "Artist" :
+                filteredSongs.sort((o1, o2) -> o1.getArtist().compareToIgnoreCase(o2.getArtist()));
+                break;
+            case "Album" :
+                filteredSongs.sort((o1, o2) -> o1.getAlbum().compareToIgnoreCase(o2.getAlbum()));
+                break;
+            case "Duration" :
+                filteredSongs.sort((o1, o2) -> Long.compare(o1.getDuration(), o2.getDuration()));
+                break;
+            default:
+                break;
+        }
+
+        if (!isAscending) {
+            Collections.reverse(filteredSongs);
+        }
+
         notifyDataSetChanged();
     }
 
+
     static class SongViewHolder extends RecyclerView.ViewHolder {
-        TextView title, artist, duration;
+        TextView title, songInfo, duration;
         ImageView albumCover;
         ImageButton playButton;
         boolean isPlaying;
@@ -97,7 +142,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.songTitle);
-            artist = itemView.findViewById(R.id.songArtist);
+            songInfo = itemView.findViewById(R.id.songInfo);
             duration = itemView.findViewById(R.id.songDuration);
             albumCover = itemView.findViewById(R.id.songAlbumCover);
             playButton = itemView.findViewById(R.id.songPlay);

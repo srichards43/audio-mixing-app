@@ -13,7 +13,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.audiomixer.R;
@@ -31,8 +35,12 @@ public class SongFragment extends Fragment {
 
     private Uri musicDirectory;
     private RecyclerView recyclerView;
-    private SongAdapter adapter;
+    private SongAdapter songAdapter;
     private SearchView songSearch;
+    private Spinner sortSpinner;
+    private ImageButton songSortButton;
+    private boolean isAscending = true; // Track state of songSortButton
+    String sortCategory = "Added";
 
     public SongFragment() {
         // Required empty public constructor
@@ -54,8 +62,8 @@ public class SongFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         List<AudioFile> songs = loadAudioFiles(musicDirectory);
-        adapter = new SongAdapter(songs);
-        recyclerView.setAdapter(adapter);
+        songAdapter = new SongAdapter(songs);
+        recyclerView.setAdapter(songAdapter);
 
         songSearch = view.findViewById(R.id.songSearch);
 
@@ -66,9 +74,46 @@ public class SongFragment extends Fragment {
             }
             @Override
             public boolean onQueryTextChange(String newText) {
-                adapter.filterSongs(newText);
+                songAdapter.filterSongs(newText, sortCategory, isAscending);
                 return true;
             }
+        });
+
+        sortSpinner = view.findViewById(R.id.songSpinner);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                view.getContext(),
+                R.array.sort_options,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
+
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                sortCategory = parentView.getItemAtPosition(position).toString();
+                songAdapter.sortSongs(sortCategory, isAscending);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        songSortButton = view.findViewById(R.id.songSortDirection);
+
+        songSortButton.setOnClickListener(v -> {
+            isAscending = !isAscending;
+
+            if (isAscending) {
+                songSortButton.animate().rotationX(0f).setDuration(300).start();
+            } else {
+                songSortButton.animate().rotationX(180f).setDuration(300).start();
+            }
+
+            songAdapter.sortSongs(sortCategory, isAscending);
         });
 
         return view;
