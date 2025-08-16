@@ -15,14 +15,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.audiomixer.R;
 import com.example.audiomixer.objects.AudioFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
 
-    private final List<AudioFile> songs;
+    private final List<AudioFile> songs; // All available songs
+    private final List<AudioFile> filteredSongs; // Songs that match search query (default: all)
 
     public SongAdapter(List<AudioFile> songs) {
-        this.songs = songs;
+        this.songs = new ArrayList<>(songs);
+        this.filteredSongs = new ArrayList<>(songs);
     }
 
     @NonNull
@@ -37,7 +40,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     @Override
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
         // Display data at position
-        AudioFile song = songs.get(position);
+        AudioFile song = filteredSongs.get(position);
 
         holder.title.setText(song.getTitle());
         holder.artist.setText(song.getArtist());
@@ -65,7 +68,24 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     @Override
     public int getItemCount() {
         // Find how many objects are already created for reuse
-        return songs.size();
+        return filteredSongs.size();
+    }
+
+    public void filterSongs(String query) {
+        filteredSongs.clear();
+        if (query == null || query.isEmpty()) {
+            filteredSongs.addAll(songs);
+        } else {
+            query = query.toLowerCase();
+            for (AudioFile song : songs) {
+                if (song.getTitle().toLowerCase().contains(query) ||
+                        song.getArtist().toLowerCase().contains(query) ||
+                        song.getAlbum().toLowerCase().contains(query)) {
+                    filteredSongs.add(song);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     static class SongViewHolder extends RecyclerView.ViewHolder {

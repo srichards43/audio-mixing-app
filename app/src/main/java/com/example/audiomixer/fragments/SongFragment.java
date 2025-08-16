@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.example.audiomixer.R;
@@ -31,6 +32,7 @@ public class SongFragment extends Fragment {
     private Uri musicDirectory;
     private RecyclerView recyclerView;
     private SongAdapter adapter;
+    private SearchView songSearch;
 
     public SongFragment() {
         // Required empty public constructor
@@ -54,6 +56,20 @@ public class SongFragment extends Fragment {
         List<AudioFile> songs = loadAudioFiles(musicDirectory);
         adapter = new SongAdapter(songs);
         recyclerView.setAdapter(adapter);
+
+        songSearch = view.findViewById(R.id.songSearch);
+
+        songSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filterSongs(newText);
+                return true;
+            }
+        });
 
         return view;
     }
