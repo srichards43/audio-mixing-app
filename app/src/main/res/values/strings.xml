@@ -16,6 +16,11 @@
     <string name="settings_song_path">Choose song directory:</string>
     <string name="settings_path_button">Path</string>
 
+    <!--Home fragment strings-->
+    <string name="song_volume_label">SONG VOLUME</string>
+    <string name="ambient_volume_label">AMBIENT VOLUME</string>
+    <string name="default_volume">0</string>
+
     <!--Song fragment strings-->
     <string name="path_indicator">Path:</string>
     <string-array name="sort_options">

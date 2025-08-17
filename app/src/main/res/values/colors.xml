@@ -4,6 +4,6 @@
     <color name="text">#262626</color>
     <color name="secondaryText">#717171</color>
     <color name="menuBar">#D0D0D0</color>
-    <color name="primary">#0080FF</color>
-    <color name="secondary">#57A6FF</color>
+    <color name="primary">#FFAB00</color>
+    <color name="secondary">#D99100</color>
 </resources>

@@ -12,22 +12,149 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/volumeConstraints"
+            android:id="@+id/ConstraintLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <SeekBar
-                android:id="@+id/seekBar"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:rotation="0"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/ambientVolumeConstraint"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/songVolumeConstraint">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/ambientVolumeSeekBar"
+                    app:layout_constraintEnd_toEndOf="@+id/ambientVolumeSeekBar"
+                    app:layout_constraintStart_toStartOf="@+id/ambientVolumeSeekBar"
+                    app:layout_constraintTop_toTopOf="@+id/ambientVolumeSeekBar">
+
+                    <TextView
+                        android:id="@+id/ambientVolumeDisplay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/default_volume"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ambient_volume_label"
+                        android:textColor="@color/secondaryText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <me.tankery.lib.circularseekbar.CircularSeekBar
+                    android:id="@+id/ambientVolumeSeekBar"
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:rotation="90"
+                    app:cs_circle_color="?attr/colorSurface"
+                    app:cs_circle_stroke_width="10dp"
+                    app:cs_circle_progress_color="?attr/colorSecondary"
+                    app:cs_end_angle="315"
+                    app:cs_max="100"
+                    app:cs_pointer_color="?attr/colorPrimary"
+                    app:cs_pointer_stroke_width="15dp"
+                    app:cs_progress="0"
+                    app:cs_start_angle="45"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/songVolumeConstraint"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/guideline2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@+id/songVolumeSeekBar"
+                    app:layout_constraintEnd_toEndOf="@+id/songVolumeSeekBar"
+                    app:layout_constraintStart_toStartOf="@+id/songVolumeSeekBar"
+                    app:layout_constraintTop_toTopOf="@+id/songVolumeSeekBar">
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/song_volume_label"
+                        android:textColor="@color/secondaryText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/songVolumeDisplay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/default_volume"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <me.tankery.lib.circularseekbar.CircularSeekBar
+                    android:id="@+id/songVolumeSeekBar"
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:rotation="90"
+                    app:cs_circle_color="?attr/colorSurface"
+                    app:cs_circle_stroke_width="10dp"
+                    app:cs_circle_progress_color="?attr/colorSecondary"
+                    app:cs_end_angle="315"
+                    app:cs_max="100"
+                    app:cs_pointer_color="?attr/colorPrimary"
+                    app:cs_pointer_stroke_width="15dp"
+                    app:cs_progress="0"
+                    app:cs_start_angle="45"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.5" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageButton

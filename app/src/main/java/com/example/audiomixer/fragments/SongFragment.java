@@ -31,7 +31,12 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class SongFragment extends Fragment {
+public class SongFragment extends Fragment implements SongAdapter.OnSongClickListener {
+
+    // Communicate to mainActivity
+    public interface OnSongSelectListener {
+        void onSongSelected(AudioFile song);
+    }
 
     private Uri musicDirectory;
     private RecyclerView recyclerView;
@@ -40,7 +45,8 @@ public class SongFragment extends Fragment {
     private Spinner sortSpinner;
     private ImageButton songSortButton;
     private boolean isAscending = true; // Track state of songSortButton
-    String sortCategory = "Added";
+    private String sortCategory = "Added";
+    private AudioFile currentSong;
 
     public SongFragment() {
         // Required empty public constructor
@@ -62,7 +68,7 @@ public class SongFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         List<AudioFile> songs = loadAudioFiles(musicDirectory);
-        songAdapter = new SongAdapter(songs);
+        songAdapter = new SongAdapter(songs, this);
         recyclerView.setAdapter(songAdapter);
 
         songSearch = view.findViewById(R.id.songSearch);
@@ -201,5 +207,17 @@ public class SongFragment extends Fragment {
      */
     private boolean isMetadata(String metadata) {
         return metadata != null && !metadata.isEmpty();
+    }
+
+    public void onPlayClick(AudioFile song) {
+        if (song.equals(currentSong)) {
+            // Song is already playing, toggle pause
+            currentSong = null;
+            songAdapter.setCurrentSong(null);
+        } else {
+            // New song clicked, start playing
+            currentSong = song;
+            songAdapter.setCurrentSong(song);
+        }
     }
 }

@@ -22,12 +22,20 @@ import java.util.Objects;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
 
+    // Interface to communicate to corresponding fragment, which then communicates to activity
+    public interface OnSongClickListener {
+        void onPlayClick(AudioFile song);
+    }
+
     private final List<AudioFile> songs; // All available songs
     private final List<AudioFile> filteredSongs; // Songs that match search query (default: all)
+    private final OnSongClickListener listener;
+    private AudioFile currentSong; // No position
 
-    public SongAdapter(List<AudioFile> songs) {
+    public SongAdapter(List<AudioFile> songs, OnSongClickListener listener) {
         this.songs = new ArrayList<>(songs);
         this.filteredSongs = new ArrayList<>(songs);
+        this.listener = listener;
     }
 
     @NonNull
@@ -59,14 +67,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             holder.albumCover.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
+        if (song.equals(currentSong)) {
+            holder.playButton.setImageResource(android.R.drawable.ic_media_pause);
+        } else {
+            holder.playButton.setImageResource(android.R.drawable.ic_media_play);
+        }
+
         holder.playButton.setOnClickListener(v -> {
-            // Toggle state of song, change image to represent
-            holder.isPlaying = !holder.isPlaying;
-            if (holder.isPlaying) {
-                holder.playButton.setImageResource(android.R.drawable.ic_media_pause);
-            } else {
-                holder.playButton.setImageResource(android.R.drawable.ic_media_play);
-            }
+                listener.onPlayClick(song);
         });
     }
 
@@ -74,6 +82,21 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public int getItemCount() {
         // Find how many objects are already created for reuse
         return filteredSongs.size();
+    }
+
+    public void setCurrentSong(AudioFile song) {
+        AudioFile oldSong = currentSong;
+        currentSong = song;
+
+        // Refresh old item
+        if (oldSong != null) {
+            int oldIndex = filteredSongs.indexOf(oldSong);
+            if (oldIndex != -1) notifyItemChanged(oldIndex);
+        }
+
+        // Refresh new item
+        int newIndex = filteredSongs.indexOf(song);
+        if (newIndex != -1) notifyItemChanged(newIndex);
     }
 
     /**

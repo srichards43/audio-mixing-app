@@ -3,8 +3,10 @@ package com.example.audiomixer.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,14 +16,23 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.adapters.PagerAdapter;
+import com.example.audiomixer.fragments.SongFragment;
+import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.utils.AppPreferences;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-public class MainActivity extends AppCompatActivity {
+import me.tankery.lib.circularseekbar.CircularSeekBar;
+
+public class MainActivity extends AppCompatActivity implements SongFragment.OnSongSelectListener {
+
+    public interface OnSongSelectedListener {
+        void onSongSelected (AudioFile song, int position, SongFragment source);
+    }
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
+
     /* temp
     SeekBar songVolBar;
     TextView songVolLabel;
@@ -96,5 +107,10 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    @Override
+    public void onSongSelected(AudioFile song) {
+
     }
 }
