@@ -11,6 +11,7 @@ constraintlayout = "2.1.4"
 coordinatorlayout = "1.3.0"
 viewpager2 = "1.1.0"
 recyclerview = "1.4.0"
+media3Exoplayer = "1.8.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -24,6 +25,7 @@ coordinatorlayout = { group = "androidx.coordinatorlayout", name = "coordinatorl
 viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version = "2.6.2" }
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
 
 
 [plugins]

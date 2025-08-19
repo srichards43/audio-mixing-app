@@ -86,6 +86,10 @@ public class HomeFragment extends Fragment {
 
         ambientVolumeSeekBar.setOnSeekBarChangeListener(volumeListener);
 
+        // Initialise labels
+        volumeListener.onProgressChanged(songVolumeSeekBar, songVolumeSeekBar.getProgress(), false);
+        volumeListener.onProgressChanged(ambientVolumeSeekBar, ambientVolumeSeekBar.getProgress(), false);
+
         return view;
     }
 }

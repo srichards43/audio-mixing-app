@@ -1,7 +1,12 @@
 package com.example.audiomixer.fragments;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -9,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +29,7 @@ import android.widget.TextView;
 import com.example.audiomixer.R;
 import com.example.audiomixer.adapters.SongAdapter;
 import com.example.audiomixer.objects.AudioFile;
+import com.example.audiomixer.services.MusicPlaybackService;
 import com.example.audiomixer.utils.AppPreferences;
 
 import java.io.IOException;
@@ -47,6 +54,8 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     private boolean isAscending = true; // Track state of songSortButton
     private String sortCategory = "Added";
     private AudioFile currentSong;
+    private MusicPlaybackService playbackService;
+    private boolean serviceBound = false;
 
     public SongFragment() {
         // Required empty public constructor
@@ -209,6 +218,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         return metadata != null && !metadata.isEmpty();
     }
 
+    /**
     public void onPlayClick(AudioFile song) {
         if (song.equals(currentSong)) {
             // Song is already playing, toggle pause
@@ -218,6 +228,52 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
             // New song clicked, start playing
             currentSong = song;
             songAdapter.setCurrentSong(song);
+        }
+    }
+     */
+
+    public void onPlayClick(AudioFile song) {
+        if (serviceBound) {
+            playbackService.play(song);
+            songAdapter.setCurrentSong(song);
+        }
+    }
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicPlaybackService.LocalBinder binder = (MusicPlaybackService.LocalBinder) service;
+            playbackService = binder.getService();
+            serviceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceBound = false;
+        }
+    };
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Intent intent = new Intent(getActivity(), MusicPlaybackService.class);
+
+        // Use correct syntax for version >= Oreo
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            requireActivity().startForegroundService(intent);
+        } else {
+            requireActivity().startService(intent);
+        }
+
+        requireActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (serviceBound) {
+            requireActivity().unbindService(serviceConnection);
+            serviceBound = false;
         }
     }
 }

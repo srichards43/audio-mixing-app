@@ -41,6 +41,10 @@ dependencies {
     implementation libs.recyclerview
 
     implementation 'me.tankery.lib:circularSeekBar:1.4.2'
+    implementation "androidx.media:media:1.6.0"
+
+    implementation libs.media3.exoplayer
+
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

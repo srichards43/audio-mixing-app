@@ -33,34 +33,6 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
 
-    /* temp
-    SeekBar songVolBar;
-    TextView songVolLabel;
-    SeekBar ambienceVolBar;
-
-    SeekBar.OnSeekBarChangeListener volumeListener = new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean bool) {
-            TextView label = null;
-            if (seekBar == songVolBar) {
-                label = songVolLabel;
-            } else if (seekBar == ambienceVolBar) {
-                label = null; // temp
-            }
-
-            label.setText("" + progress); // Convert to string
-        }
-
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-        }
-
-        public void onStopTrackingTouch(SeekBar seekbar) {
-
-        }
-    };
-    */
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,16 +63,6 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
                     break;
             }
         }).attach();
-
-        // Find ids
-        /* temp
-        songVolBar = findViewById(R.id.songVolumeBar);
-        songVolLabel = findViewById(R.id.songVolumeLabel);
-        ambienceVolBar = findViewById(R.id.ambienceVolumeBar);
-
-        // Add listeners
-        songVolBar.setOnSeekBarChangeListener(volumeListener);
-        */
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
