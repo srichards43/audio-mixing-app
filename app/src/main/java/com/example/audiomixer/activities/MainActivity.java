@@ -1,13 +1,18 @@
 package com.example.audiomixer.activities;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -32,6 +37,11 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
+    private ConstraintLayout songPanel;
+    private SeekBar songSeekBar;
+    private boolean isSongPanelOpen = false; // Store state of song panel
+    private Drawable thumb;
+
 
 
     @Override
@@ -69,6 +79,24 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        songPanel = findViewById(R.id.songPanel);
+        songSeekBar = findViewById(R.id.songPositionSeekBar);
+        thumb = ResourcesCompat.getDrawable(getResources(), R.drawable.seekbar_thumb, null);
+
+        songPanel.setOnClickListener(v -> toggleSongPanel());
+    }
+
+    private void toggleSongPanel() {
+        isSongPanelOpen = !isSongPanelOpen;
+
+        if (isSongPanelOpen) {
+            songSeekBar.setOnTouchListener(null); // Allow song bar movement
+            songSeekBar.setThumb(thumb);
+        } else {
+            songSeekBar.setOnTouchListener((v, event) -> true);
+            songSeekBar.setThumb(null);
+        }
     }
 
     @Override
