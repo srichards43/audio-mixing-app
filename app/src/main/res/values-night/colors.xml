@@ -4,6 +4,7 @@
     <color name="text">#DEDEDE</color>
     <color name="secondaryText">#8E8E8E</color>
     <color name="menuBar">#333333</color>
+    <color name="secondaryMenuBar">#242424</color>
     <color name="primary">#FF2600</color>
     <color name="secondary">#B42700</color>
 </resources>

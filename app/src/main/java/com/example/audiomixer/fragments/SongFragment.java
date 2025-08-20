@@ -42,7 +42,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
 
     // Communicate to mainActivity
     public interface OnSongSelectListener {
-        void onSongSelected(AudioFile song);
+        void onSongSelected(List<AudioFile> playlist, int position);
     }
 
     private Uri musicDirectory;
@@ -54,11 +54,22 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     private boolean isAscending = true; // Track state of songSortButton
     private String sortCategory = "Added";
     private AudioFile currentSong;
+    private OnSongSelectListener onSongSelectListener;
     private MusicPlaybackService playbackService;
     private boolean serviceBound = false;
 
     public SongFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnSongSelectListener) {
+            onSongSelectListener = (OnSongSelectListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement OnSongSelectListener");
+        }
     }
 
     @Override
@@ -164,7 +175,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
 
                     String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
                     if (!isMetadata(album)) {
-                        album = "Unknown Album";
+                        album = "";
                     }
 
                     String durationString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
@@ -218,6 +229,13 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         return metadata != null && !metadata.isEmpty();
     }
 
+    public void onPlayClick(int position) {
+        List<AudioFile> playlist = songAdapter.getFilteredSongs();
+        if (onSongSelectListener != null) {
+            onSongSelectListener.onSongSelected(playlist, position);
+        }
+    }
+
     /**
     public void onPlayClick(AudioFile song) {
         if (song.equals(currentSong)) {
@@ -232,12 +250,14 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     }
      */
 
+    /**
     public void onPlayClick(AudioFile song) {
         if (serviceBound) {
             playbackService.play(song);
             songAdapter.setCurrentSong(song);
         }
     }
+    */
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override

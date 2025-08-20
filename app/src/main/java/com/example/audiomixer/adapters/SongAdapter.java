@@ -24,7 +24,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
     // Interface to communicate to corresponding fragment, which then communicates to activity
     public interface OnSongClickListener {
-        void onPlayClick(AudioFile song);
+        void onPlayClick(int position);
     }
 
     private final List<AudioFile> songs; // All available songs
@@ -54,7 +54,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
         holder.title.setText(song.getTitle());
         holder.songInfo.setText(song.getArtist());
-        if (!Objects.equals(song.getAlbum(), "Unknown Album")) {
+        if (!Objects.equals(song.getAlbum(), "")) {
             holder.songInfo.append(" • " + song.getAlbum());
         }
         holder.duration.setText(song.getFormattedDuration());
@@ -74,7 +74,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         }
 
         holder.playButton.setOnClickListener(v -> {
-                listener.onPlayClick(song);
+                listener.onPlayClick(position);
         });
     }
 
@@ -82,6 +82,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public int getItemCount() {
         // Find how many objects are already created for reuse
         return filteredSongs.size();
+    }
+
+    public List<AudioFile> getFilteredSongs() {
+        return filteredSongs;
     }
 
     public void setCurrentSong(AudioFile song) {

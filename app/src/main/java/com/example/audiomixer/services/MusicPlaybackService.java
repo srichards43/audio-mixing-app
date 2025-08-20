@@ -10,13 +10,16 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 
 import androidx.core.app.NotificationCompat;
-import androidx.core.graphics.drawable.IconCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.media3.common.MediaItem;
 import androidx.media3.exoplayer.ExoPlayer;
 
@@ -24,11 +27,19 @@ import com.example.audiomixer.R;
 import com.example.audiomixer.activities.MainActivity;
 import com.example.audiomixer.objects.AudioFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MusicPlaybackService extends Service {
     private ExoPlayer player;
     private MediaSessionCompat mediaSession;
     private PlaybackStateCompat.Builder stateBuilder;
     private final IBinder binder = new LocalBinder();
+    private Handler handler;
+    private Runnable updatePositionRunnable;
+    private List<AudioFile> playlist = new ArrayList<>();
+    private int currentPositionInPlaylist = 0;
+    private final MutableLiveData<Long> currentPositionInSong = new MutableLiveData<>();
     String channelId = "music_channel";
 
 
@@ -66,8 +77,10 @@ public class MusicPlaybackService extends Service {
                 int state = -1;
                 if (isPlaying) {
                     state = PlaybackStateCompat.STATE_PLAYING;
+                    startUpdatingPositionInSong();
                 } else {
                     state = PlaybackStateCompat.STATE_PAUSED;
+                    stopUpdatingPositionInSong();
                 }
 
                 // Update session
@@ -91,6 +104,19 @@ public class MusicPlaybackService extends Service {
                 manager.createNotificationChannel(channel);
             }
         }
+
+        handler = new Handler(Looper.getMainLooper());
+
+        updatePositionRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if (player.isPlaying()) {
+                    currentPositionInSong.setValue(player.getCurrentPosition());
+                    handler.postDelayed(this, 1000); // Call every sec
+                }
+            }
+        };
     }
     public MusicPlaybackService() {
     }
@@ -139,19 +165,71 @@ public class MusicPlaybackService extends Service {
                 .build();
     }
 
+    // Set a new playlist
+    public void setPlaylist(List<AudioFile> newPlaylist) {
+        playlist.clear();
+        playlist.addAll(newPlaylist);
+        currentPositionInPlaylist = 0; // reset to start
+    }
+
     // Play song from audioFile
-    public void play(AudioFile song) {
-        player.setMediaItem(MediaItem.fromUri(song.getFilePath()));
+    public void play(int position) {
+        if (position < 0 || position >= playlist.size()) {
+            return;
+        }
+
+        currentPositionInPlaylist = position;
+
+        List<MediaItem> mediaItems = new ArrayList<>();
+        for(AudioFile song : playlist){
+            mediaItems.add(MediaItem.fromUri(song.getFilePath()));
+        }
+        player.setMediaItems(mediaItems, position, 0);
         player.prepare();
         player.play();
 
+        /** todo: fix
         Notification notification = createNotification(song);
         NotificationManager manager = getSystemService(NotificationManager.class);
         manager.notify(1, notification);
+         */
     }
 
     public void pause() {
         player.pause();
+    }
+
+    public void resume() {
+        player.play();
+    }
+
+    public void goToCurrentPosInSong(long pos) {
+        player.seekTo(pos);
+    }
+
+    public LiveData<Long> getCurrentPositionInSong() {
+        return currentPositionInSong;
+    }
+
+    public void startUpdatingPositionInSong() {
+        handler.removeCallbacks(updatePositionRunnable);
+        handler.post(updatePositionRunnable);
+    }
+
+    public void stopUpdatingPositionInSong() {
+        handler.removeCallbacks(updatePositionRunnable);
+    }
+
+    public boolean isPlaying() {
+        return player.isPlaying();
+    }
+
+    public AudioFile getCurrentSong() {
+        return playlist.get(currentPositionInPlaylist);
+    }
+
+    public long getCurrentPosInSong() {
+        return player.getCurrentPosition();
     }
 
     public void stop() {
