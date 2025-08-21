@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
     private SeekBar songSeekBar;
     private boolean isSongPanelOpen = false; // Store state of song panel
     private Drawable thumb;
+    private Drawable invisibleThumb;
     private MusicPlaybackService playbackService;
     private boolean serviceBound = false;
     private ImageButton songPauseButton;
@@ -160,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         });
 
         thumb = ResourcesCompat.getDrawable(getResources(), R.drawable.seekbar_thumb, null);
+        invisibleThumb = ResourcesCompat.getDrawable(getResources(), R.drawable.invisible_thumb, null);
+        assert invisibleThumb != null;
+
 
         songPauseButton = findViewById(R.id.panelPauseButton);
         songPauseButton.setOnClickListener(v -> pauseOrResume());
@@ -172,11 +176,18 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         isSongPanelOpen = !isSongPanelOpen;
 
         if (isSongPanelOpen) {
-            songSeekBar.setOnTouchListener(null); // Allow song bar movement
+            songSeekBar.setOnTouchListener(null);
             songSeekBar.setThumb(thumb);
+
+            Long posLong = playbackService.getCurrentPositionInSong().getValue();
+            if (posLong != null) {
+                int progress = posLong.intValue();
+
+                songSeekBar.post(() -> songSeekBar.setProgress(progress));
+            }
         } else {
             songSeekBar.setOnTouchListener((v, event) -> true);
-            songSeekBar.setThumb(null);
+            songSeekBar.setThumb(invisibleThumb);
         }
     }
 

@@ -228,10 +228,6 @@ public class MusicPlaybackService extends Service {
         return playlist.get(currentPositionInPlaylist);
     }
 
-    public long getCurrentPosInSong() {
-        return player.getCurrentPosition();
-    }
-
     public void stop() {
         player.stop();
         stopForeground(true);

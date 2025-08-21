@@ -125,7 +125,7 @@
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
             android:progressBackgroundTint="@android:color/transparent"
-            android:thumb="@drawable/seekbar_thumb"
+            android:thumb="@drawable/invisible_thumb"
             android:thumbTint="?attr/colorPrimary"
             app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
             app:layout_constraintEnd_toEndOf="@+id/constraintLayout2"
