@@ -28,6 +28,7 @@ import com.example.audiomixer.fragments.SongFragment;
 import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.services.MusicPlaybackService;
 import com.example.audiomixer.utils.AppPreferences;
+import com.example.audiomixer.utils.TimeUtility;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
     private ImageButton songPauseButton;
     private TextView songTitle;
     private TextView songInfo;
+    private TextView songCurrentTimeText;
+    private TextView songDurationText;
 
 
 
@@ -62,9 +65,10 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             playbackService = binder.getService();
             serviceBound = true;
 
-            // Observe position in song from service
+            // Observe position in song from service, continuously update seekbar progress and time display
             playbackService.getCurrentPositionInSong().observe(MainActivity.this, pos -> {
                 songSeekBar.setProgress(pos.intValue());
+                songCurrentTimeText.setText(TimeUtility.getFormattedDuration(pos));
             });
         }
 
@@ -162,14 +166,14 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
 
         thumb = ResourcesCompat.getDrawable(getResources(), R.drawable.seekbar_thumb, null);
         invisibleThumb = ResourcesCompat.getDrawable(getResources(), R.drawable.invisible_thumb, null);
-        assert invisibleThumb != null;
-
 
         songPauseButton = findViewById(R.id.panelPauseButton);
         songPauseButton.setOnClickListener(v -> pauseOrResume());
 
         songTitle = findViewById(R.id.panelSongTitle);
         songInfo = findViewById(R.id.panelSongInfo);
+        songCurrentTimeText = findViewById(R.id.panelSongCurrentTime);
+        songDurationText = findViewById(R.id.panelSongDuration);
     }
 
     private void toggleSongPanel() {
@@ -210,8 +214,14 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             songInfo.append(" • " + song.getAlbum());
         }
 
-        int duration = (int) song.getDuration(); // Cast to int for seekbar
-        songSeekBar.setMax(duration);
+        long duration = song.getDuration(); // Cast to int for seekbar
+        songSeekBar.setMax((int) duration);
+
+        songDurationText.setText("/");
+        songDurationText.append(TimeUtility.getFormattedDuration(duration));
+
+        // Instantly set currentTime display to 0 to avoid tick based load in
+        songCurrentTimeText.setText(TimeUtility.getFormattedDuration(0));
     }
 
     @Override

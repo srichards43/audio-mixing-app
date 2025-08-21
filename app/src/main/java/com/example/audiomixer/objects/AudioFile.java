@@ -1,5 +1,7 @@
 package com.example.audiomixer.objects;
 
+import com.example.audiomixer.utils.TimeUtility;
+
 import java.io.File;
 import java.util.Locale;
 import java.util.Objects;
@@ -48,9 +50,7 @@ public class AudioFile {
 
     // Return the duration in min:sec format
     public String getFormattedDuration() {
-        long minutes = duration / 60000;
-        long seconds = (duration % 60000) / 1000;
-        return String.format(Locale.UK, "%d:%02d", minutes, seconds);
+        return TimeUtility.getFormattedDuration(duration);
     }
 
     public String getFilePath() {
