@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">AudioMixer</string>
+
+    <!--MainActivity strings-->
     <string name="settings_button">Settings page button</string>
+    <string name="pause_button">Pause button</string>
+    <string name="skip_next_button">Skip to next song button</string>
+    <string name="skip_previous_button">Skip to previous song button</string>
 
     <!--Settings page strings-->
     <string name="settings_general_h">General</string>

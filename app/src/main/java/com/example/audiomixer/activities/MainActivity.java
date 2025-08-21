@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -38,6 +39,7 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity implements SongFragment.OnSongSelectListener {
 
     private ConstraintLayout songPanel;
+    private LinearLayout songToolbar;
     private SeekBar songSeekBar;
     private boolean isSongPanelOpen = false; // Store state of song panel
     private Drawable thumb;
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
     private TextView songInfo;
     private TextView songCurrentTimeText;
     private TextView songDurationText;
+    private final int PANEL_ANIMATION_DURATION = 200;
 
 
 
@@ -63,6 +66,11 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             playbackService.getCurrentPositionInSong().observe(MainActivity.this, pos -> {
                 songSeekBar.setProgress(pos.intValue());
                 songCurrentTimeText.setText(TimeUtility.getFormattedDuration(pos));
+            });
+
+            // Observe when song changes, call updateSongDetails()
+            playbackService.getCurrentSongInternal().observe(MainActivity.this, song -> {
+                updateSongDetails();
             });
         }
 
@@ -132,10 +140,14 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             return insets;
         });
 
-        songPanel = findViewById(R.id.songPanel);
+        songPanel = findViewById(R.id.songPanelContainer);
         songPanel.setOnClickListener(v -> toggleSongPanel());
 
-        songSeekBar = findViewById(R.id.songPositionSeekBar);
+        songToolbar = findViewById(R.id.panelToolbar);
+        songToolbar.setTranslationY(120f); // Hide initially
+        setToolbarChildrenClickable(false);
+
+        songSeekBar = songPanel.findViewById(R.id.songPositionSeekBar);
         songSeekBar.setOnTouchListener((v, event) -> true); // Not open on startup
 
         songSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -144,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser && serviceBound) {
                     playbackService.goToCurrentPosInSong(progress);
+                    songCurrentTimeText.setText(TimeUtility.getFormattedDuration(progress));
                 }
             }
 
@@ -159,21 +172,27 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         });
 
         thumb = ResourcesCompat.getDrawable(getResources(), R.drawable.seekbar_thumb, null);
+
+        // Thumb with alpha = 0 and width = 1dp to stop visual errors
         invisibleThumb = ResourcesCompat.getDrawable(getResources(), R.drawable.invisible_thumb, null);
 
-        songPauseButton = findViewById(R.id.panelPauseButton);
+        songPauseButton = songPanel.findViewById(R.id.panelPauseButton);
         songPauseButton.setOnClickListener(v -> pauseOrResume());
 
-        songTitle = findViewById(R.id.panelSongTitle);
-        songInfo = findViewById(R.id.panelSongInfo);
-        songCurrentTimeText = findViewById(R.id.panelSongCurrentTime);
-        songDurationText = findViewById(R.id.panelSongDuration);
+        songTitle = songPanel.findViewById(R.id.panelSongTitle);
+        songInfo = songPanel.findViewById(R.id.panelSongInfo);
+        songCurrentTimeText = songToolbar.findViewById(R.id.panelSongCurrentTime);
+        songDurationText = songToolbar.findViewById(R.id.panelSongDuration);
     }
 
+    /**
+     * Switch between song panel opening and closing
+     */
     private void toggleSongPanel() {
         isSongPanelOpen = !isSongPanelOpen;
 
         if (isSongPanelOpen) {
+            // Open
             songSeekBar.setOnTouchListener(null);
             songSeekBar.setThumb(thumb);
 
@@ -183,12 +202,22 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
 
                 songSeekBar.post(() -> songSeekBar.setProgress(progress));
             }
+
+            songToolbar.animate().translationY(-0f).setDuration(PANEL_ANIMATION_DURATION).start();
+            setToolbarChildrenClickable(true);
         } else {
+            // Close
             songSeekBar.setOnTouchListener((v, event) -> true);
             songSeekBar.setThumb(invisibleThumb);
+
+            songToolbar.animate().translationY(120f).setDuration(PANEL_ANIMATION_DURATION).start();
+            setToolbarChildrenClickable(false);
         }
     }
 
+    /**
+     * Update pause button UI and state of service
+     */
     private void pauseOrResume() {
         if (playbackService.isPlaying()) {
             playbackService.pause();
@@ -216,6 +245,16 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
 
         // Instantly set currentTime display to 0 to avoid tick based load in
         songCurrentTimeText.setText(TimeUtility.getFormattedDuration(0));
+    }
+
+    /**
+     * Helper function to disable/enable clickable children of songToolbar (stops them from blocking main panel)
+     * @param clickable true to enable, false to disable
+     */
+    private void setToolbarChildrenClickable(boolean clickable) {
+        for (int i = 0; i < songToolbar.getChildCount(); i++) {
+            songToolbar.getChildAt(i).setClickable(clickable);
+        }
     }
 
     /**

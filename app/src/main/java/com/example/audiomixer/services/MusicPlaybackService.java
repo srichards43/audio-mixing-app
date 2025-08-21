@@ -34,8 +34,8 @@ public class MusicPlaybackService extends Service {
     private Handler handler;
     private Runnable updatePositionRunnable;
     private final List<AudioFile> playlist = new ArrayList<>();
-    private int currentPositionInPlaylist = 0;
-    private final MutableLiveData<Long> currentPositionInSong = new MutableLiveData<>();
+    private final MutableLiveData<Long> currentPositionInSongInternal = new MutableLiveData<>();
+    private final MutableLiveData<AudioFile> currentSongInternal = new MutableLiveData<>();
     String channelId = "music_channel";
 
 
@@ -87,6 +87,15 @@ public class MusicPlaybackService extends Service {
                                 .build()
                 );
             }
+
+            @Override
+            public void onMediaItemTransition(MediaItem mediaItem, int reason) {
+                if (mediaItem != null) {
+                    int currentIndex = player.getCurrentMediaItemIndex();
+                    AudioFile newSong = playlist.get(currentIndex);
+                    onSongChanged(newSong);
+                }
+            }
         });
 
         NotificationManager manager = getSystemService(NotificationManager.class);
@@ -109,7 +118,7 @@ public class MusicPlaybackService extends Service {
             @Override
             public void run() {
                 if (player.isPlaying()) {
-                    currentPositionInSong.setValue(player.getCurrentPosition());
+                    currentPositionInSongInternal.setValue(player.getCurrentPosition());
                     handler.postDelayed(this, 1000);
                 }
             }
@@ -142,7 +151,6 @@ public class MusicPlaybackService extends Service {
     public void setPlaylist(List<AudioFile> newPlaylist) {
         playlist.clear();
         playlist.addAll(newPlaylist);
-        currentPositionInPlaylist = 0; // reset to start
     }
 
     // Play song from audioFile
@@ -150,8 +158,6 @@ public class MusicPlaybackService extends Service {
         if (position < 0 || position >= playlist.size()) {
             return;
         }
-
-        currentPositionInPlaylist = position;
 
         List<MediaItem> mediaItems = new ArrayList<>();
         for(AudioFile song : playlist){
@@ -175,7 +181,7 @@ public class MusicPlaybackService extends Service {
     }
 
     public LiveData<Long> getCurrentPositionInSong() {
-        return currentPositionInSong;
+        return currentPositionInSongInternal;
     }
 
     public void startUpdatingPositionInSong() {
@@ -192,7 +198,20 @@ public class MusicPlaybackService extends Service {
     }
 
     public AudioFile getCurrentSong() {
-        return playlist.get(currentPositionInPlaylist);
+        int index = player.getCurrentMediaItemIndex();
+        if (index >= 0 && index < playlist.size()) {
+            return playlist.get(index);
+        } else {
+            throw new IndexOutOfBoundsException("Invalid index: " + index);
+        }
+    }
+
+    public LiveData<AudioFile> getCurrentSongInternal() {
+        return currentSongInternal;
+    }
+
+    private void onSongChanged(AudioFile newSong) {
+        currentSongInternal.postValue(newSong);
     }
 
     public void stop() {
