@@ -3,17 +3,16 @@ package com.example.audiomixer.objects;
 import com.example.audiomixer.utils.TimeUtility;
 
 import java.io.File;
-import java.util.Locale;
 import java.util.Objects;
 
 public class AudioFile {
-    private String title;
-    private String artist;
-    private String album;
-    private long duration;
-    private byte[] albumCover;
-    private String filePath;
-    private long createdAt;
+    private final String title;
+    private final String artist;
+    private final String album;
+    private final long duration;
+    private final byte[] albumCover;
+    private final String filePath;
+    private final long createdAt;
 
     public AudioFile(String title, String artist, String album, long duration, String filePath, byte[] albumCover) {
         this.title = Objects.requireNonNullElse(title, "Unknown");

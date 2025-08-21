@@ -1,20 +1,16 @@
 package com.example.audiomixer.fragments;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +20,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.SearchView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.adapters.SongAdapter;
 import com.example.audiomixer.objects.AudioFile;
-import com.example.audiomixer.services.MusicPlaybackService;
 import com.example.audiomixer.utils.AppPreferences;
 
 import java.io.IOException;
@@ -46,29 +40,24 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     }
 
     private Uri musicDirectory;
-    private RecyclerView recyclerView;
     private SongAdapter songAdapter;
-    private SearchView songSearch;
-    private Spinner sortSpinner;
     private ImageButton songSortButton;
     private boolean isAscending = true; // Track state of songSortButton
     private String sortCategory = "Added";
-    private AudioFile currentSong;
     private OnSongSelectListener onSongSelectListener;
-    private MusicPlaybackService playbackService;
-    private boolean serviceBound = false;
 
     public SongFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
+        // Connect interface to MainActivity
         super.onAttach(context);
         if (context instanceof OnSongSelectListener) {
             onSongSelectListener = (OnSongSelectListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement OnSongSelectListener");
+            throw new RuntimeException(context + " must implement OnSongSelectListener");
         }
     }
 
@@ -84,15 +73,18 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_song, container, false);
 
-        recyclerView = view.findViewById(R.id.songRecyclerView);
+        RecyclerView recyclerView = view.findViewById(R.id.songRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         List<AudioFile> songs = loadAudioFiles(musicDirectory);
+
+        // Fill recycler view with songs, link adapter to fragment for interface calls
         songAdapter = new SongAdapter(songs, this);
         recyclerView.setAdapter(songAdapter);
 
-        songSearch = view.findViewById(R.id.songSearch);
 
+        // Set listener to call filterSongs on search query change
+        SearchView songSearch = view.findViewById(R.id.songSearch);
         songSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -105,8 +97,8 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
             }
         });
 
-        sortSpinner = view.findViewById(R.id.songSpinner);
-
+        // Create spinner options for sorting
+        Spinner sortSpinner = view.findViewById(R.id.songSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 view.getContext(),
                 R.array.sort_options,
@@ -115,6 +107,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(adapter);
 
+        // Set listener to call sortSongs on spinner selection
         sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -128,8 +121,8 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
             }
         });
 
+        // Set listener on ascend/descend button for animation and sortSongs method call
         songSortButton = view.findViewById(R.id.songSortDirection);
-
         songSortButton.setOnClickListener(v -> {
             isAscending = !isAscending;
 
@@ -165,17 +158,17 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
 
                     String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
                     if (!isMetadata(title)) {
-                        title = file.getName();
+                        title = file.getName(); // default
                     }
 
                     String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
                     if (!isMetadata(artist)) {
-                        artist = "Unknown";
+                        artist = "Unknown"; // default
                     }
 
                     String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
                     if (!isMetadata(album)) {
-                        album = "";
+                        album = ""; // default
                     }
 
                     String durationString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
@@ -188,6 +181,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
 
                     byte[] albumCover = retriever.getEmbeddedPicture();
 
+                    // Create audio file
                     audioFiles.add(new AudioFile(
                             title,
                             artist,
@@ -198,6 +192,8 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
                     ));
                 } catch (Exception e) {
                     Log.e("SongFragment", "Error loading audio file:", e);
+
+                    // On exception, create placeholder audioFile
                     audioFiles.add(new AudioFile(
                             file.getName(),
                             "Unknown",
@@ -229,71 +225,14 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         return metadata != null && !metadata.isEmpty();
     }
 
+    /**
+     * Get playlist from adapter and send to mainActivity with position
+     * @param position position of the song within playlist
+     */
     public void onPlayClick(int position) {
         List<AudioFile> playlist = songAdapter.getFilteredSongs();
         if (onSongSelectListener != null) {
             onSongSelectListener.onSongSelected(playlist, position);
-        }
-    }
-
-    /**
-    public void onPlayClick(AudioFile song) {
-        if (song.equals(currentSong)) {
-            // Song is already playing, toggle pause
-            currentSong = null;
-            songAdapter.setCurrentSong(null);
-        } else {
-            // New song clicked, start playing
-            currentSong = song;
-            songAdapter.setCurrentSong(song);
-        }
-    }
-     */
-
-    /**
-    public void onPlayClick(AudioFile song) {
-        if (serviceBound) {
-            playbackService.play(song);
-            songAdapter.setCurrentSong(song);
-        }
-    }
-    */
-
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicPlaybackService.LocalBinder binder = (MusicPlaybackService.LocalBinder) service;
-            playbackService = binder.getService();
-            serviceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
-        }
-    };
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Intent intent = new Intent(getActivity(), MusicPlaybackService.class);
-
-        // Use correct syntax for version >= Oreo
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            requireActivity().startForegroundService(intent);
-        } else {
-            requireActivity().startService(intent);
-        }
-
-        requireActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (serviceBound) {
-            requireActivity().unbindService(serviceConnection);
-            serviceBound = false;
         }
     }
 }

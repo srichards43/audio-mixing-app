@@ -6,8 +6,6 @@ import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.example.audiomixer.R;
-
 public class AppPreferences {
     private static final String PREFS_NAME = "AudioMixerPrefs";
     private static final String THEME_INDEX_KEY = "theme_index";
@@ -23,6 +21,10 @@ public class AppPreferences {
         prefs.edit().putInt(THEME_INDEX_KEY, index).apply();
     }
 
+    /**
+     * Apply light/dark mode to app based on preferred theme index
+     * @param context context of activity to be applied
+     */
     public static void applyTheme(Context context) {
         int index = getThemeIndex(context);
         switch (index) {

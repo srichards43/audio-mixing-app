@@ -37,12 +37,6 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements SongFragment.OnSongSelectListener {
 
-    public interface OnSongSelectedListener {
-        void onSongSelected (AudioFile song, int position, SongFragment source);
-    }
-
-    private TabLayout tabLayout;
-    private ViewPager2 viewPager;
     private ConstraintLayout songPanel;
     private SeekBar songSeekBar;
     private boolean isSongPanelOpen = false; // Store state of song panel
@@ -110,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        tabLayout = findViewById(R.id.tabLayout);
-        viewPager = findViewById(R.id.viewPager);
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
         FragmentManager manager = getSupportFragmentManager();
         PagerAdapter adapter = new PagerAdapter(manager, getLifecycle());
         viewPager.setAdapter(adapter);
@@ -224,6 +218,11 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         songCurrentTimeText.setText(TimeUtility.getFormattedDuration(0));
     }
 
+    /**
+     * Called by SongFragment when a song is clicked on
+     * @param playlist list of songs to play in order
+     * @param position position of the song in playlist
+     */
     @Override
     public void onSongSelected(List<AudioFile> playlist, int position) {
         if (serviceBound) {

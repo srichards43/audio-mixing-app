@@ -1,11 +1,9 @@
 package com.example.audiomixer.services;
 
-import static android.app.PendingIntent.getActivity;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -24,7 +22,6 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.exoplayer.ExoPlayer;
 
 import com.example.audiomixer.R;
-import com.example.audiomixer.activities.MainActivity;
 import com.example.audiomixer.objects.AudioFile;
 
 import java.util.ArrayList;
@@ -33,11 +30,10 @@ import java.util.List;
 public class MusicPlaybackService extends Service {
     private ExoPlayer player;
     private MediaSessionCompat mediaSession;
-    private PlaybackStateCompat.Builder stateBuilder;
     private final IBinder binder = new LocalBinder();
     private Handler handler;
     private Runnable updatePositionRunnable;
-    private List<AudioFile> playlist = new ArrayList<>();
+    private final List<AudioFile> playlist = new ArrayList<>();
     private int currentPositionInPlaylist = 0;
     private final MutableLiveData<Long> currentPositionInSong = new MutableLiveData<>();
     String channelId = "music_channel";
@@ -59,22 +55,23 @@ public class MusicPlaybackService extends Service {
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
 
         // Set actions for android compatibility
-        stateBuilder = new PlaybackStateCompat.Builder()
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                 .setActions(
                         PlaybackStateCompat.ACTION_PLAY |
-                        PlaybackStateCompat.ACTION_PAUSE |
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                                PlaybackStateCompat.ACTION_PAUSE |
+                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
                                 PlaybackStateCompat.ACTION_STOP
                 );
 
         mediaSession.setPlaybackState(stateBuilder.build());
         mediaSession.setActive(true);
 
+        // Listener to change PlaybackStates and whether to call songPos updates
         player.addListener(new ExoPlayer.Listener() {
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
-                int state = -1;
+                int state;
                 if (isPlaying) {
                     state = PlaybackStateCompat.STATE_PLAYING;
                     startUpdatingPositionInSong();
@@ -93,6 +90,7 @@ public class MusicPlaybackService extends Service {
         });
 
         NotificationManager manager = getSystemService(NotificationManager.class);
+
         // Create channel if android version is >= Oreo and doesn't exist yet
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (manager.getNotificationChannel(channelId) == null) {
@@ -105,15 +103,14 @@ public class MusicPlaybackService extends Service {
             }
         }
 
+        // Update position in song every 1 second
         handler = new Handler(Looper.getMainLooper());
-
         updatePositionRunnable = new Runnable() {
-
             @Override
             public void run() {
                 if (player.isPlaying()) {
                     currentPositionInSong.setValue(player.getCurrentPosition());
-                    handler.postDelayed(this, 1000); // Call every sec
+                    handler.postDelayed(this, 1000);
                 }
             }
         };
@@ -141,30 +138,6 @@ public class MusicPlaybackService extends Service {
         return binder;
     }
 
-    // Create notification for song playing
-    private Notification createNotification(AudioFile song) {
-        NotificationChannel channel = null;
-
-        // Create intent to open app when notification clicked
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        return new NotificationCompat.Builder(this, "music_channel")
-                .setContentTitle(song.getTitle())
-                .setContentText(song.getArtist())
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_player_icon)
-                .setOngoing(true)
-                .setOnlyAlertOnce(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .build();
-    }
-
     // Set a new playlist
     public void setPlaylist(List<AudioFile> newPlaylist) {
         playlist.clear();
@@ -187,12 +160,6 @@ public class MusicPlaybackService extends Service {
         player.setMediaItems(mediaItems, position, 0);
         player.prepare();
         player.play();
-
-        /** todo: fix
-        Notification notification = createNotification(song);
-        NotificationManager manager = getSystemService(NotificationManager.class);
-        manager.notify(1, notification);
-         */
     }
 
     public void pause() {

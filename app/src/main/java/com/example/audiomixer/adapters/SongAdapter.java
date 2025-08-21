@@ -30,7 +30,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     private final List<AudioFile> songs; // All available songs
     private final List<AudioFile> filteredSongs; // Songs that match search query (default: all)
     private final OnSongClickListener listener;
-    private AudioFile currentSong; // No position
 
     public SongAdapter(List<AudioFile> songs, OnSongClickListener listener) {
         this.songs = new ArrayList<>(songs);
@@ -54,23 +53,20 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
         holder.title.setText(song.getTitle());
         holder.songInfo.setText(song.getArtist());
+
+        // Append album if exists
         if (!Objects.equals(song.getAlbum(), "")) {
             holder.songInfo.append(" • " + song.getAlbum());
         }
+
         holder.duration.setText(song.getFormattedDuration());
 
         if (song.getAlbumCover() != null) {
             Bitmap bmp = BitmapFactory.decodeByteArray(song.getAlbumCover(), 0, song.getAlbumCover().length);
             holder.albumCover.setImageBitmap(bmp);
         } else {
-            // show default album placeholder
+            // Show default album placeholder
             holder.albumCover.setImageResource(android.R.drawable.ic_menu_report_image);
-        }
-
-        if (song.equals(currentSong)) {
-            holder.playButton.setImageResource(android.R.drawable.ic_media_pause);
-        } else {
-            holder.playButton.setImageResource(android.R.drawable.ic_media_play);
         }
 
         holder.playButton.setOnClickListener(v -> {
@@ -86,21 +82,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
     public List<AudioFile> getFilteredSongs() {
         return filteredSongs;
-    }
-
-    public void setCurrentSong(AudioFile song) {
-        AudioFile oldSong = currentSong;
-        currentSong = song;
-
-        // Refresh old item
-        if (oldSong != null) {
-            int oldIndex = filteredSongs.indexOf(oldSong);
-            if (oldIndex != -1) notifyItemChanged(oldIndex);
-        }
-
-        // Refresh new item
-        int newIndex = filteredSongs.indexOf(song);
-        if (newIndex != -1) notifyItemChanged(newIndex);
     }
 
     /**
@@ -164,7 +145,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         TextView title, songInfo, duration;
         ImageView albumCover;
         ImageButton playButton;
-        boolean isPlaying;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
