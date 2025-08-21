@@ -42,10 +42,10 @@
         <LinearLayout
             android:id="@+id/panelToolbar"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="48dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
             android:background="@color/secondaryMenuBar"
             android:orientation="horizontal"
             app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
@@ -61,37 +61,14 @@
                 android:contentDescription="@string/skip_previous_button"
                 app:srcCompat="@drawable/skip_previous" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <ImageButton
+                android:id="@+id/panelPauseButton"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/panelSongCurrentTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/panelSongDuration"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/panelSongCurrentTime"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_height="wrap_content"
+                android:background="#00FFFFFF"
+                android:contentDescription="@string/pause_button"
+                app:srcCompat="@drawable/pause"
+                app:tint="@color/secondaryText" />
 
             <ImageButton
                 android:id="@+id/panelSkipNextButton"
@@ -99,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="#00FFFFFF"
-                android:contentDescription="@string/skip_previous_button"
+                android:contentDescription="@string/skip_next_button"
                 app:srcCompat="@drawable/skip_next" />
 
         </LinearLayout>
@@ -116,17 +93,30 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <ImageButton
-                android:id="@+id/panelPauseButton"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#00FFFFFF"
-                android:contentDescription="@string/pause_button"
+                android:layout_marginEnd="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/pause"
-                app:tint="@color/secondaryText" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/panelSongCurrentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/panelSongDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/panelSongCurrentTime"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout3"

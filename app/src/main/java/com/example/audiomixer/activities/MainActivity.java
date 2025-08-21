@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
     private MusicPlaybackService playbackService;
     private boolean serviceBound = false;
     private ImageButton songPauseButton;
+    private ImageButton songNextButton;
+    private ImageButton songPreviousButton;
     private TextView songTitle;
     private TextView songInfo;
     private TextView songCurrentTimeText;
@@ -145,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
 
         songToolbar = findViewById(R.id.panelToolbar);
         songToolbar.setTranslationY(120f); // Hide initially
-        setToolbarChildrenClickable(false);
 
         songSeekBar = songPanel.findViewById(R.id.songPositionSeekBar);
         songSeekBar.setOnTouchListener((v, event) -> true); // Not open on startup
@@ -176,13 +177,27 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         // Thumb with alpha = 0 and width = 1dp to stop visual errors
         invisibleThumb = ResourcesCompat.getDrawable(getResources(), R.drawable.invisible_thumb, null);
 
-        songPauseButton = songPanel.findViewById(R.id.panelPauseButton);
+        songPauseButton = songToolbar.findViewById(R.id.panelPauseButton);
         songPauseButton.setOnClickListener(v -> pauseOrResume());
+
+        songNextButton = songPanel.findViewById(R.id.panelSkipNextButton);
+        songNextButton.setOnClickListener(v -> {
+            playbackService.skipToNext();
+            pauseOrResume();
+        });
+
+        songPreviousButton = songPanel.findViewById(R.id.panelSkipPreviousButton);
+        songPreviousButton.setOnClickListener(v -> {
+            playbackService.skipToPrevious();
+            pauseOrResume();
+        });
 
         songTitle = songPanel.findViewById(R.id.panelSongTitle);
         songInfo = songPanel.findViewById(R.id.panelSongInfo);
-        songCurrentTimeText = songToolbar.findViewById(R.id.panelSongCurrentTime);
-        songDurationText = songToolbar.findViewById(R.id.panelSongDuration);
+        songCurrentTimeText = songPanel.findViewById(R.id.panelSongCurrentTime);
+        songDurationText = songPanel.findViewById(R.id.panelSongDuration);
+
+        setToolbarChildrenClickable(false); // Stop children from blocking main panel on start
     }
 
     /**
@@ -268,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             playbackService.setPlaylist(playlist);
             playbackService.play(position);
             updateSongDetails();
+            pauseOrResume();
         }
     }
 }

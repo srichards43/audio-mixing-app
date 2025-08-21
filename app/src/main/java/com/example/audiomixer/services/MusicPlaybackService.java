@@ -176,6 +176,14 @@ public class MusicPlaybackService extends Service {
         player.play();
     }
 
+    public void skipToNext() {
+        player.seekToNext();
+    }
+
+    public void skipToPrevious() {
+        player.seekToPrevious();
+    }
+
     public void goToCurrentPosInSong(long pos) {
         player.seekTo(pos);
     }
