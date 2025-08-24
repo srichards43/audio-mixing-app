@@ -1,7 +1,10 @@
 package com.example.audiomixer.adapters;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.audiomixer.R;
@@ -30,11 +34,24 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     private final List<AudioFile> songs; // All available songs
     private final List<AudioFile> filteredSongs; // Songs that match search query (default: all)
     private final OnSongClickListener listener;
+    private final int colorPrimary;
+    private final int colorDefault;
+    private String currentlyPlayingPath = null;
 
-    public SongAdapter(List<AudioFile> songs, OnSongClickListener listener) {
+    public SongAdapter(List<AudioFile> songs, OnSongClickListener listener, Context context) {
         this.songs = new ArrayList<>(songs);
         this.filteredSongs = new ArrayList<>(songs);
         this.listener = listener;
+
+        // Get colorPrimary from theme
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+        colorPrimary = typedValue.data;
+
+        // Get colorDefault from theme
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        colorDefault = typedValue.data;
     }
 
     @NonNull
@@ -50,6 +67,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
         // Display data at position
         AudioFile song = filteredSongs.get(position);
+        String songPath = song.getFilePath();
 
         holder.title.setText(song.getTitle());
         holder.songInfo.setText(song.getArtist());
@@ -69,15 +87,48 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             holder.albumCover.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
-        holder.playButton.setOnClickListener(v -> {
-                listener.onPlayClick(position);
+        holder.songConstraint.setOnClickListener(v -> {
+            listener.onPlayClick(position);
+            setCurrentlyPlaying(songPath);
         });
+
+        // Set title color based on song currently playing
+        if (Objects.equals(songPath, currentlyPlayingPath)) {
+            holder.title.setTextColor(colorPrimary);
+        } else {
+            holder.title.setTextColor(colorDefault);
+        }
     }
 
     @Override
     public int getItemCount() {
         // Find how many objects are already created for reuse
         return filteredSongs.size();
+    }
+
+    public void setCurrentlyPlaying(String path) {
+        String previousPath = currentlyPlayingPath;
+        currentlyPlayingPath = path;
+        if (previousPath != null) {
+            int previousPos = findPositionByPath(previousPath);
+            if (previousPos != -1) {
+                notifyItemChanged(previousPos);
+            }
+        }
+        int newPos = findPositionByPath(path);
+        if (newPos != -1) {
+            notifyItemChanged(newPos);
+        }
+
+    }
+
+    private int findPositionByPath(String path) {
+        for (int i = 0; i < filteredSongs.size(); i++) {
+            if (filteredSongs.get(i).getFilePath().equals(path)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public List<AudioFile> getFilteredSongs() {
@@ -146,14 +197,15 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         ImageView albumCover;
         ImageButton playButton;
 
+        ConstraintLayout songConstraint;
+
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.songTitle);
             songInfo = itemView.findViewById(R.id.songInfo);
             duration = itemView.findViewById(R.id.songDuration);
             albumCover = itemView.findViewById(R.id.songAlbumCover);
-            playButton = itemView.findViewById(R.id.songPlay);
-
+            songConstraint = itemView.findViewById(R.id.songConstraint);
         }
     }
 }

@@ -31,7 +31,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/songPanelContainer"
+        android:id="@+id/songPlayer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -40,7 +40,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
-            android:id="@+id/panelToolbar"
+            android:id="@+id/toolbarPanel"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
@@ -48,9 +48,9 @@
             android:layout_marginBottom="4dp"
             android:background="@color/secondaryMenuBar"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
-            app:layout_constraintEnd_toEndOf="@+id/constraintLayout2"
-            app:layout_constraintStart_toStartOf="@+id/constraintLayout2">
+            app:layout_constraintBottom_toTopOf="@+id/songPanel"
+            app:layout_constraintEnd_toEndOf="@+id/songPanel"
+            app:layout_constraintStart_toStartOf="@+id/songPanel">
 
             <ImageButton
                 android:id="@+id/panelSkipPreviousButton"
@@ -82,7 +82,7 @@
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout2"
+            android:id="@+id/songPanel"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_gravity="bottom"
@@ -168,9 +168,9 @@
             android:progressBackgroundTint="@android:color/transparent"
             android:thumb="@drawable/invisible_thumb"
             android:thumbTint="?attr/colorPrimary"
-            app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
-            app:layout_constraintEnd_toEndOf="@+id/constraintLayout2"
-            app:layout_constraintStart_toStartOf="@+id/constraintLayout2" />
+            app:layout_constraintBottom_toTopOf="@+id/songPanel"
+            app:layout_constraintEnd_toEndOf="@+id/songPanel"
+            app:layout_constraintStart_toStartOf="@+id/songPanel" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -38,6 +38,7 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements SongFragment.OnSongSelectListener {
 
+    private ConstraintLayout songMiniplayer;
     private ConstraintLayout songPanel;
     private LinearLayout songToolbar;
     private SeekBar songSeekBar;
@@ -117,8 +118,8 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         FragmentManager manager = getSupportFragmentManager();
-        PagerAdapter adapter = new PagerAdapter(manager, getLifecycle());
-        viewPager.setAdapter(adapter);
+        PagerAdapter pagerAdapter = new PagerAdapter(manager, getLifecycle());
+        viewPager.setAdapter(pagerAdapter);
 
         viewPager.setCurrentItem(1, false);
 
@@ -142,15 +143,14 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             return insets;
         });
 
-        songPanel = findViewById(R.id.songPanelContainer);
+        songMiniplayer = findViewById(R.id.songPlayer);
+        songPanel = songMiniplayer.findViewById(R.id.songPanel);
         songPanel.setOnClickListener(v -> toggleSongPanel());
 
-        songToolbar = findViewById(R.id.panelToolbar);
+        songToolbar = songMiniplayer.findViewById(R.id.toolbarPanel);
         songToolbar.setTranslationY(120f); // Hide initially
 
-        songSeekBar = songPanel.findViewById(R.id.songPositionSeekBar);
-        songSeekBar.setOnTouchListener((v, event) -> true); // Not open on startup
-
+        songSeekBar = songMiniplayer.findViewById(R.id.songPositionSeekBar);
         songSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -180,24 +180,24 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         songPauseButton = songToolbar.findViewById(R.id.panelPauseButton);
         songPauseButton.setOnClickListener(v -> pauseOrResume());
 
-        songNextButton = songPanel.findViewById(R.id.panelSkipNextButton);
+        songNextButton = songToolbar.findViewById(R.id.panelSkipNextButton);
         songNextButton.setOnClickListener(v -> {
             playbackService.skipToNext();
             pauseOrResume();
         });
 
-        songPreviousButton = songPanel.findViewById(R.id.panelSkipPreviousButton);
+        songPreviousButton = songToolbar.findViewById(R.id.panelSkipPreviousButton);
         songPreviousButton.setOnClickListener(v -> {
             playbackService.skipToPrevious();
             pauseOrResume();
         });
 
+        setToolbarChildrenClickable(false); // Not open on startup
+
         songTitle = songPanel.findViewById(R.id.panelSongTitle);
         songInfo = songPanel.findViewById(R.id.panelSongInfo);
         songCurrentTimeText = songPanel.findViewById(R.id.panelSongCurrentTime);
         songDurationText = songPanel.findViewById(R.id.panelSongDuration);
-
-        setToolbarChildrenClickable(false); // Stop children from blocking main panel on start
     }
 
     /**

@@ -45,6 +45,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     private boolean isAscending = true; // Track state of songSortButton
     private String sortCategory = "Added";
     private OnSongSelectListener onSongSelectListener;
+    private Context savedContext;
 
     public SongFragment() {
         // Required empty public constructor
@@ -54,6 +55,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     public void onAttach(@NonNull Context context) {
         // Connect interface to MainActivity
         super.onAttach(context);
+        savedContext = context;
         if (context instanceof OnSongSelectListener) {
             onSongSelectListener = (OnSongSelectListener) context;
         } else {
@@ -79,7 +81,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         List<AudioFile> songs = loadAudioFiles(musicDirectory);
 
         // Fill recycler view with songs, link adapter to fragment for interface calls
-        songAdapter = new SongAdapter(songs, this);
+        songAdapter = new SongAdapter(songs, this, savedContext);
         recyclerView.setAdapter(songAdapter);
 
 
@@ -231,6 +233,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
      */
     public void onPlayClick(int position) {
         List<AudioFile> playlist = songAdapter.getFilteredSongs();
+
         if (onSongSelectListener != null) {
             onSongSelectListener.onSongSelected(playlist, position);
         }
