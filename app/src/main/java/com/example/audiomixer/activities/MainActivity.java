@@ -31,6 +31,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.adapters.PagerAdapter;
+import com.example.audiomixer.fragments.HomeFragment;
 import com.example.audiomixer.fragments.SongFragment;
 import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.services.MusicPlaybackService;
@@ -42,7 +43,8 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.List;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements SongFragment.OnSongSelectListener {
+public class MainActivity extends AppCompatActivity
+        implements SongFragment.OnSongSelectListener, HomeFragment.OnVolumeChangeListener {
 
     private ConstraintLayout songMiniplayer;
     private ConstraintLayout songPanel;
@@ -233,6 +235,8 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         songInfo = songPanel.findViewById(R.id.panelSongInfo);
         songCurrentTimeText = songPanel.findViewById(R.id.panelSongCurrentTime);
         songDurationText = songPanel.findViewById(R.id.panelSongDuration);
+
+        songMiniplayer.setVisibility(View.GONE);
     }
 
     /**
@@ -348,6 +352,24 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             playbackService.play(position);
             updateSongDetails();
             pauseOrResume();
+
+            songMiniplayer.setVisibility(View.VISIBLE);
         }
+    }
+
+    /**
+     * Called by HomeFragment when volume seekbar is changed
+     * @param volume of the songs playing
+     */
+    @Override
+    public void onSongVolumeChanged(float volume) {
+        if (playbackService != null) {
+            playbackService.setSongVolume(volume);
+        }
+    }
+
+    @Override
+    public void onAmbientVolumeChanged(float volume) {
+
     }
 }

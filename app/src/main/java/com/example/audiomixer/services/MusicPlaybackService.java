@@ -188,6 +188,8 @@ public class MusicPlaybackService extends Service {
         player.seekTo(pos);
     }
 
+    public void setSongVolume(float volume) { player.setVolume(volume); }
+
     public void setLoop(int state) {
         switch (state) {
             case 0:

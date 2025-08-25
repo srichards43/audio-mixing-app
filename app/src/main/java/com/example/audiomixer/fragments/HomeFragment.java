@@ -1,8 +1,10 @@
 package com.example.audiomixer.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -13,6 +15,9 @@ import android.widget.TextView;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.activities.SettingsActivity;
+import com.example.audiomixer.objects.AudioFile;
+
+import java.util.List;
 
 import me.tankery.lib.circularseekbar.CircularSeekBar;
 
@@ -22,6 +27,26 @@ public class HomeFragment extends Fragment {
     private CircularSeekBar ambientVolumeSeekBar;
     private TextView songVolumeDisplay;
     private TextView ambientVolumeDisplay;
+    private HomeFragment.OnVolumeChangeListener onVolumeChangeListener;
+
+
+
+    // Communicate to mainActivity
+    public interface OnVolumeChangeListener {
+        void onSongVolumeChanged(float volume);
+        void onAmbientVolumeChanged(float volume);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        // Connect interface to MainActivity
+        super.onAttach(context);
+        if (context instanceof HomeFragment.OnVolumeChangeListener) {
+            onVolumeChangeListener = (HomeFragment.OnVolumeChangeListener) context;
+        } else {
+            throw new RuntimeException(context + " must implement OnSongSelectListener");
+        }
+    }
 
     CircularSeekBar.OnCircularSeekBarChangeListener volumeListener = new CircularSeekBar.OnCircularSeekBarChangeListener () {
 
@@ -39,11 +64,14 @@ public class HomeFragment extends Fragment {
         public void onProgressChanged(@Nullable CircularSeekBar circularSeekBar, float v, boolean b) {
             TextView label = null;
 
+            float volume = v / 100f; // Convert into ExoPlayer compatible volume
             // Set corresponding label
             if (circularSeekBar == songVolumeSeekBar) {
                 label = songVolumeDisplay;
+                onVolumeChangeListener.onSongVolumeChanged(volume);
             } else if (circularSeekBar == ambientVolumeSeekBar) {
                 label = ambientVolumeDisplay;
+                onVolumeChangeListener.onAmbientVolumeChanged(volume);
             }
 
             if (label != null) {
