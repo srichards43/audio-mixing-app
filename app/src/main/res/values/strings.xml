@@ -6,6 +6,7 @@
     <string name="pause_button">Pause</string>
     <string name="skip_next_button">Skip to next song</string>
     <string name="skip_previous_button">Skip to previous song</string>
+    <string name="loop_text">1</string>
 
     <!--Settings page strings-->
     <string name="settings_general_h">General</string>

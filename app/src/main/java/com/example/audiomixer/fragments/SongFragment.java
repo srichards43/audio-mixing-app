@@ -219,6 +219,14 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     }
 
     /**
+     * Update the currently playing song in the adapter, called from MainActivity
+     * @param songPath path of the song playing
+     */
+    public void updateCurrentSong(String songPath) {
+        songAdapter.setCurrentlyPlaying(songPath);
+    }
+
+    /**
      * Helper method for metadata validation
      * @param metadata, the metadata category to check
      * @return true if the metadata is not null or empty

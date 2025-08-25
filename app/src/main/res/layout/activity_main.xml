@@ -52,6 +52,33 @@
             app:layout_constraintEnd_toEndOf="@+id/songPanel"
             app:layout_constraintStart_toStartOf="@+id/songPanel">
 
+            <FrameLayout
+                android:id="@+id/panelLoopButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/loopIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    app:srcCompat="@drawable/loop"
+                    app:tint="@color/secondaryText" />
+
+                <TextView
+                    android:id="@+id/loopText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:text="@string/loop_text"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
             <ImageButton
                 android:id="@+id/panelSkipPreviousButton"
                 android:layout_width="wrap_content"
@@ -59,12 +86,14 @@
                 android:layout_weight="1"
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/skip_previous_button"
-                app:srcCompat="@drawable/skip_previous" />
+                app:srcCompat="@drawable/skip_previous"
+                app:tint="@color/secondaryText"/>
 
             <ImageButton
                 android:id="@+id/panelPauseButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/pause_button"
                 app:srcCompat="@drawable/pause"
@@ -77,7 +106,17 @@
                 android:layout_weight="1"
                 android:background="#00FFFFFF"
                 android:contentDescription="@string/skip_next_button"
-                app:srcCompat="@drawable/skip_next" />
+                app:srcCompat="@drawable/skip_next"
+                app:tint="@color/secondaryText"/>
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                app:srcCompat="@drawable/queue" />
 
         </LinearLayout>
 

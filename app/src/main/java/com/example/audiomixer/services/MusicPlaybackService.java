@@ -188,6 +188,20 @@ public class MusicPlaybackService extends Service {
         player.seekTo(pos);
     }
 
+    public void setLoop(int state) {
+        switch (state) {
+            case 0:
+                player.setRepeatMode(ExoPlayer.REPEAT_MODE_OFF);
+                break;
+            case 1:
+                player.setRepeatMode(ExoPlayer.REPEAT_MODE_ALL);
+                break;
+            case 2:
+                player.setRepeatMode(ExoPlayer.REPEAT_MODE_ONE);
+                break;
+        }
+    }
+
     public LiveData<Long> getCurrentPositionInSong() {
         return currentPositionInSongInternal;
     }

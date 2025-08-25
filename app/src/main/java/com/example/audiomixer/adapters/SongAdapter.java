@@ -106,6 +106,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         return filteredSongs.size();
     }
 
+    /**
+     * Set the currently playing song in the list to update the UI
+     * @param path of the audioFile
+     */
     public void setCurrentlyPlaying(String path) {
         String previousPath = currentlyPlayingPath;
         currentlyPlayingPath = path;
@@ -122,6 +126,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
     }
 
+    /**
+     * Helper method that converts a path to a position
+     * @param path of the audioFile
+     * @return position of the audioFile in the filtered list
+     */
     private int findPositionByPath(String path) {
         for (int i = 0; i < filteredSongs.size(); i++) {
             if (filteredSongs.get(i).getFilePath().equals(path)) {

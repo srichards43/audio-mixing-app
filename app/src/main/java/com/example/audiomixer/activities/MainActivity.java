@@ -4,11 +4,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.TypedValue;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -55,7 +61,12 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
     private TextView songCurrentTimeText;
     private TextView songDurationText;
     private final int PANEL_ANIMATION_DURATION = 200;
-
+    private int loopState = 0; // 0 = off, 1 = repeat current, 2 = repeat playlist
+    private FrameLayout loopButton;
+    private ImageView loopIcon;
+    private TextView loopPlaylistIndicator;
+    private int colorPrimary;
+    private int colorDefault;
 
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -74,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             // Observe when song changes, call updateSongDetails()
             playbackService.getCurrentSongInternal().observe(MainActivity.this, song -> {
                 updateSongDetails();
+
+                // Notify SongFragment to update adapter UI
+                SongFragment fragment = (SongFragment) getSupportFragmentManager()
+                        .findFragmentByTag("f0");
+                if (fragment != null) {
+                    fragment.updateCurrentSong(song.getFilePath());
+                }
             });
         }
 
@@ -114,6 +132,16 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Get colorPrimary from theme
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = this.getTheme();
+        theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+        colorPrimary = typedValue.data;
+
+        // Get default button color from theme
+        theme.resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
+        colorDefault = typedValue.data;
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         ViewPager2 viewPager = findViewById(R.id.viewPager);
@@ -192,6 +220,13 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
             pauseOrResume();
         });
 
+        loopButton = songToolbar.findViewById(R.id.panelLoopButton);
+        loopIcon = loopButton.findViewById(R.id.loopIcon);
+        loopPlaylistIndicator = loopButton.findViewById(R.id.loopText);
+        loopPlaylistIndicator.setVisibility(View.GONE);
+
+        loopButton.setOnClickListener(v -> toggleLoop());
+
         setToolbarChildrenClickable(false); // Not open on startup
 
         songTitle = songPanel.findViewById(R.id.panelSongTitle);
@@ -231,6 +266,34 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
     }
 
     /**
+     * Method to toggle between 3 loop options: no loop, loop current, loop all
+     */
+    private void toggleLoop() {
+        if (loopState == 2) {
+            loopState = 0;
+        } else {
+            loopState++;
+        }
+
+        // Set UI to match state
+        switch (loopState) {
+            case 0:
+                loopIcon.setImageTintList(ColorStateList.valueOf(colorDefault));
+                loopPlaylistIndicator.setVisibility(View.GONE);
+                break;
+            case 1:
+                loopIcon.setImageTintList(ColorStateList.valueOf(colorPrimary));
+                break;
+            case 2:
+                loopIcon.setImageTintList(ColorStateList.valueOf(colorPrimary));
+                loopPlaylistIndicator.setVisibility(View.VISIBLE);
+        }
+
+        // Set service state
+        playbackService.setLoop(loopState);
+    }
+
+    /**
      * Update pause button UI and state of service
      */
     private void pauseOrResume() {
@@ -254,6 +317,7 @@ public class MainActivity extends AppCompatActivity implements SongFragment.OnSo
 
         long duration = song.getDuration(); // Cast to int for seekbar
         songSeekBar.setMax((int) duration);
+        songSeekBar.setProgress(0); // Instantly update to avoid visual errors
 
         songDurationText.setText("/");
         songDurationText.append(TimeUtility.getFormattedDuration(duration));
