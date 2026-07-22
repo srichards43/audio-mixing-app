@@ -100,7 +100,7 @@ public class MusicPlaybackService extends Service {
 
         NotificationManager manager = getSystemService(NotificationManager.class);
 
-        // Create channel if android version is >= Oreo and doesn't exist yet
+        // Create channel if android version is >= Oreo and doesn't exist yet (otherwise breaks)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (manager.getNotificationChannel(channelId) == null) {
                 NotificationChannel channel = new NotificationChannel(
@@ -226,12 +226,43 @@ public class MusicPlaybackService extends Service {
         if (index >= 0 && index < playlist.size()) {
             return playlist.get(index);
         } else {
-            throw new IndexOutOfBoundsException("Invalid index: " + index);
+            // No songs
+            return null;
         }
     }
 
+    public List<AudioFile> getPlaylist() {
+        return playlist;
+    }
+
+    public List<AudioFile> getUpNext() {
+        int current = player.getCurrentMediaItemIndex();
+        if (current == -1 || playlist.isEmpty()) return new ArrayList<>();
+
+        return new ArrayList<>(playlist.subList(current, playlist.size()));
+    }
+
+    public void moveItemInQueue(int from, int to) {
+        if (from >= 0 && from < playlist.size()) {
+            if (to >= 0 && to < playlist.size()) {
+                AudioFile item = playlist.remove(from);
+                playlist.add(to, item);
+
+                player.moveMediaItem(from, to);
+                return;
+            }
+            throw new IllegalArgumentException("Invalid 'to' index");
+        }
+        throw new IllegalArgumentException("Invalid 'from' index");
+    }
+
+
     public LiveData<AudioFile> getCurrentSongInternal() {
         return currentSongInternal;
+    }
+
+    public int getCurrentIndex() {
+        return player.getCurrentMediaItemIndex();
     }
 
     private void onSongChanged(AudioFile newSong) {

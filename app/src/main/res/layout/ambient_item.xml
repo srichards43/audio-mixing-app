@@ -5,14 +5,11 @@
     android:id="@+id/songConstraint"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
     android:paddingLeft="5dp"
     android:paddingRight="5dp">
 
     <View
-        android:id="@+id/songDivider"
+        android:id="@+id/ambientDivider"
         android:layout_width="401dp"
         android:layout_height="2dp"
         android:background="?attr/colorSurface"
@@ -21,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/songAlbumCover"
+        android:id="@+id/ambientCover"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
@@ -32,36 +29,17 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_report_image" />
 
-    <TextView
-        android:id="@+id/songDuration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/songAlbumCover"
+        app:layout_constraintStart_toEndOf="@+id/ambientCover"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/songInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="26dp"
-            android:text="TextView"
-            android:textColor="?android:textColorSecondary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/songTitle" />
-
-        <TextView
-            android:id="@+id/songTitle"
+            android:id="@+id/ambientTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TextView"

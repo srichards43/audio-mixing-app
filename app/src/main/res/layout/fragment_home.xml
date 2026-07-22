@@ -24,16 +24,40 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:src="@drawable/sleep_timer"
+                app:layout_constraintBottom_toTopOf="@+id/sleepTimerButton"
+                app:layout_constraintEnd_toEndOf="@+id/sleepTimerButton"
+                app:layout_constraintStart_toStartOf="@+id/sleepTimerButton" />
+
+            <Button
+                android:id="@+id/sleepTimerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:backgroundTint="#443186"
+                android:text="@string/sleep_timer_button"
+                android:textColor="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="@+id/ambientVolumeConstraint"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/songVolumeConstraint" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/ambientVolumeConstraint"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/songVolumeConstraint">
+                app:layout_constraintTop_toTopOf="@+id/guideline2"
+                app:layout_constraintVertical_bias="1.0">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="0dp"
@@ -72,8 +96,8 @@
                     android:layout_height="250dp"
                     android:rotation="90"
                     app:cs_circle_color="?attr/colorSurface"
-                    app:cs_circle_stroke_width="10dp"
                     app:cs_circle_progress_color="?attr/colorSecondary"
+                    app:cs_circle_stroke_width="10dp"
                     app:cs_end_angle="315"
                     app:cs_max="100"
                     app:cs_pointer_color="?attr/colorPrimary"
@@ -92,10 +116,13 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginBottom="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 app:layout_constraintBottom_toTopOf="@+id/guideline2"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="0dp"
@@ -133,8 +160,8 @@
                     android:layout_height="250dp"
                     android:rotation="90"
                     app:cs_circle_color="?attr/colorSurface"
-                    app:cs_circle_stroke_width="10dp"
                     app:cs_circle_progress_color="?attr/colorSecondary"
+                    app:cs_circle_stroke_width="10dp"
                     app:cs_end_angle="315"
                     app:cs_max="100"
                     app:cs_pointer_color="?attr/colorPrimary"
@@ -145,6 +172,22 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/settingsButton"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/settings_button"
+                    android:onClick="launchSettings"
+                    android:scaleType="fitCenter"
+                    android:scaleX="1"
+                    android:scaleY="1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/settings" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -157,15 +200,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <ImageButton
-            android:id="@+id/settingsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/settings_button"
-            android:onClick="launchSettings"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_edit" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

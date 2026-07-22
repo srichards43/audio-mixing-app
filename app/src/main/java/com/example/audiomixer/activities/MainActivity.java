@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,11 +34,13 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.audiomixer.R;
 import com.example.audiomixer.adapters.PagerAdapter;
 import com.example.audiomixer.fragments.HomeFragment;
+import com.example.audiomixer.fragments.QueueFragment;
 import com.example.audiomixer.fragments.SongFragment;
 import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.services.MusicPlaybackService;
 import com.example.audiomixer.utils.AppPreferences;
 import com.example.audiomixer.utils.TimeUtility;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     private LinearLayout songToolbar;
     private SeekBar songSeekBar;
     private boolean isSongPanelOpen = false; // Store state of song panel
+    private boolean isAmbientButtonOpen = true; // Store state of ambient FAB
+    private MaterialButton ambientFab;
     private Drawable thumb;
     private Drawable invisibleThumb;
     private MusicPlaybackService playbackService;
@@ -58,8 +64,10 @@ public class MainActivity extends AppCompatActivity
     private ImageButton songPauseButton;
     private ImageButton songNextButton;
     private ImageButton songPreviousButton;
+    private ImageButton queueButton;
     private TextView songTitle;
     private TextView songInfo;
+    private ImageView songAlbumCover;
     private TextView songCurrentTimeText;
     private TextView songDurationText;
     private final int PANEL_ANIMATION_DURATION = 200;
@@ -95,6 +103,13 @@ public class MainActivity extends AppCompatActivity
                     fragment.updateCurrentSong(song.getFilePath());
                 }
             });
+
+            // Check if song is already playing
+            AudioFile currentSong = playbackService.getCurrentSong();
+            if (currentSong != null) {
+                songMiniplayer.setVisibility(View.VISIBLE);
+                updateSongDetails();
+            }
         }
 
         @Override
@@ -229,14 +244,23 @@ public class MainActivity extends AppCompatActivity
 
         loopButton.setOnClickListener(v -> toggleLoop());
 
+        queueButton = songToolbar.findViewById(R.id.queueButton);
+        queueButton.setOnClickListener(v -> openQueue());
+
+
         setToolbarChildrenClickable(false); // Not open on startup
 
-        songTitle = songPanel.findViewById(R.id.panelSongTitle);
-        songInfo = songPanel.findViewById(R.id.panelSongInfo);
-        songCurrentTimeText = songPanel.findViewById(R.id.panelSongCurrentTime);
-        songDurationText = songPanel.findViewById(R.id.panelSongDuration);
+        songTitle = songPanel.findViewById(R.id.songTitle);
+        songInfo = songPanel.findViewById(R.id.songInfo);
+        songCurrentTimeText = songPanel.findViewById(R.id.songCurrentTime);
+        songDurationText = songPanel.findViewById(R.id.songDuration);
+        songAlbumCover = songPanel.findViewById(R.id.songAlbumCover);
 
         songMiniplayer.setVisibility(View.GONE);
+
+        ambientFab = findViewById(R.id.ambientFab);
+
+        //ambientFab.setVisibility(View.GONE);
     }
 
     /**
@@ -250,6 +274,7 @@ public class MainActivity extends AppCompatActivity
             songSeekBar.setOnTouchListener(null);
             songSeekBar.setThumb(thumb);
 
+            // Manually set thumb to current time (avoids 1s delay from service updating pos)
             Long posLong = playbackService.getCurrentPositionInSong().getValue();
             if (posLong != null) {
                 int progress = posLong.intValue();
@@ -259,6 +284,12 @@ public class MainActivity extends AppCompatActivity
 
             songToolbar.animate().translationY(-0f).setDuration(PANEL_ANIMATION_DURATION).start();
             setToolbarChildrenClickable(true);
+
+            // If ambient FAB open, also animate
+            if (isAmbientButtonOpen) {
+                ambientFab.animate().translationY(-0f).setDuration(PANEL_ANIMATION_DURATION).start();
+            }
+
         } else {
             // Close
             songSeekBar.setOnTouchListener((v, event) -> true);
@@ -266,6 +297,18 @@ public class MainActivity extends AppCompatActivity
 
             songToolbar.animate().translationY(120f).setDuration(PANEL_ANIMATION_DURATION).start();
             setToolbarChildrenClickable(false);
+
+            // If ambient FAB open, also animate
+            if (isAmbientButtonOpen) {
+                ambientFab.animate().translationY(120f).setDuration(PANEL_ANIMATION_DURATION).start();
+            }
+        }
+    }
+
+    private void openQueue() {
+        if (serviceBound && playbackService != null) {
+            QueueFragment fragment = new QueueFragment(playbackService);
+            fragment.show(getSupportFragmentManager(), "QueueDialog");
         }
     }
 
@@ -310,6 +353,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Find current song and update display with details
+     */
     private void updateSongDetails() {
         AudioFile song = playbackService.getCurrentSong();
 
@@ -328,6 +374,14 @@ public class MainActivity extends AppCompatActivity
 
         // Instantly set currentTime display to 0 to avoid tick based load in
         songCurrentTimeText.setText(TimeUtility.getFormattedDuration(0));
+
+        if (song.getAlbumCover() != null) {
+            Bitmap bmp = BitmapFactory.decodeByteArray(song.getAlbumCover(), 0, song.getAlbumCover().length);
+            songAlbumCover.setImageBitmap(bmp);
+        } else {
+            // Show default album placeholder
+            songAlbumCover.setImageResource(android.R.drawable.ic_menu_report_image);
+        }
     }
 
     /**

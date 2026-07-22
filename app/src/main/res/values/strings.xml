@@ -1,5 +1,7 @@
 <resources>
+    <!--General-->
     <string name="app_name">AudioMixer</string>
+    <string name="nothing_found_error">There\'s nothing here...</string>
 
     <!--MainActivity strings-->
     <string name="settings_button">Settings page</string>
@@ -7,6 +9,7 @@
     <string name="skip_next_button">Skip to next song</string>
     <string name="skip_previous_button">Skip to previous song</string>
     <string name="loop_text">1</string>
+    <string name="queue_button">Show or hide queue</string>
 
     <!--Settings page strings-->
     <string name="settings_general_h">General</string>
@@ -26,6 +29,7 @@
     <string name="song_volume_label">SONG VOLUME</string>
     <string name="ambient_volume_label">AMBIENT VOLUME</string>
     <string name="default_volume">0</string>
+    <string name="sleep_timer_button">Sleep Timers</string>
 
     <!--Song fragment strings-->
     <string name="path_indicator">Path:</string>

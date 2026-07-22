@@ -15,7 +15,7 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/tabLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
@@ -28,6 +28,23 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/ambientFab"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="?attr/colorPrimary"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:backgroundTintMode="add"
+        app:icon="@drawable/ambient"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconTint="#ffffff"
+        app:layout_constraintBottom_toTopOf="@+id/songPlayer"
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -47,15 +64,18 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="4dp"
             android:background="@color/secondaryMenuBar"
+            android:gravity="bottom"
             android:orientation="horizontal"
+            app:flow_verticalAlign="bottom"
             app:layout_constraintBottom_toTopOf="@+id/songPanel"
             app:layout_constraintEnd_toEndOf="@+id/songPanel"
-            app:layout_constraintStart_toStartOf="@+id/songPanel">
+            app:layout_constraintStart_toStartOf="@+id/songPanel"
+            app:layout_constraintTop_toTopOf="parent">
 
             <FrameLayout
                 android:id="@+id/panelLoopButton"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="48dp"
                 android:layout_weight="1">
 
                 <ImageView
@@ -84,17 +104,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="#00FFFFFF"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/skip_previous_button"
                 app:srcCompat="@drawable/skip_previous"
-                app:tint="@color/secondaryText"/>
+                app:tint="@color/secondaryText" />
 
             <ImageButton
                 android:id="@+id/panelPauseButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="#00FFFFFF"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/pause_button"
                 app:srcCompat="@drawable/pause"
                 app:tint="@color/secondaryText" />
@@ -104,19 +124,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="#00FFFFFF"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/skip_next_button"
                 app:srcCompat="@drawable/skip_next"
-                app:tint="@color/secondaryText"/>
+                app:tint="@color/secondaryText" />
 
-            <ImageView
-                android:id="@+id/imageView3"
+            <ImageButton
+                android:id="@+id/queueButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                app:srcCompat="@drawable/queue" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/queue_button"
+                app:srcCompat="@drawable/queue"
+                app:tint="@color/secondaryText" />
 
         </LinearLayout>
 
@@ -132,7 +153,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
+            <ImageView
+                android:id="@+id/songAlbumCover"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@android:drawable/ic_menu_report_image" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -141,7 +171,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/panelSongCurrentTime"
+                    android:id="@+id/songCurrentTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -149,11 +179,11 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/panelSongDuration"
+                    android:id="@+id/songDuration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/panelSongCurrentTime"
+                    app:layout_constraintStart_toEndOf="@+id/songCurrentTime"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -161,13 +191,13 @@
                 android:id="@+id/constraintLayout3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintStart_toEndOf="@+id/songAlbumCover"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/panelSongTitle"
+                    android:id="@+id/songTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
@@ -176,23 +206,13 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/panelSongInfo"
+                    android:id="@+id/songInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/panelSongTitle" />
+                    app:layout_constraintTop_toBottomOf="@+id/songTitle" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@android:drawable/ic_menu_report_image" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
