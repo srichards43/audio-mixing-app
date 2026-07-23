@@ -1,6 +1,7 @@
 package com.example.audiomixer.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,7 @@ import com.example.audiomixer.adapters.SongAdapter;
 import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.services.MusicPlaybackService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import java.util.ArrayList;
 import java.util.List;
 
 public class QueueFragment extends BottomSheetDialogFragment {
@@ -52,8 +53,8 @@ public class QueueFragment extends BottomSheetDialogFragment {
         RecyclerView recyclerView = view.findViewById(R.id.queueRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        playlist = playbackService.getUpNext();
-        songAdapter = new SongAdapter(playlist, this :: onQueueSongClick, requireContext());
+        // Create local copy of playlist
+        songAdapter = new SongAdapter(playbackService.getUpNext(), this :: onQueueSongClick, requireContext());
         recyclerView.setAdapter(songAdapter);
 
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(
@@ -73,9 +74,8 @@ public class QueueFragment extends BottomSheetDialogFragment {
                     draggingFrom = from;
                 }
                 draggingTo = to;
-                java.util.Collections.swap(playlist, from, to);
 
-                songAdapter.notifyItemMoved(from, to);
+                songAdapter.moveItem(from, to);
                 return true;
             }
 
@@ -89,15 +89,15 @@ public class QueueFragment extends BottomSheetDialogFragment {
                     int offset = playbackService.getCurrentIndex();
                     int draggedFrom = draggingFrom + offset;
                     int draggedTo = draggingTo + offset;
-                    int max = playbackService.getPlaylist().size();
 
-                    if (draggedFrom >= 0 && draggedFrom < max && draggedTo >= 0 && draggedTo < max) {
-                        playbackService.moveItemInQueue(draggedFrom, draggedTo);
-                        // If new song dragged to top start playing
-                        if (draggingTo == 0) {
-                            playbackService.play(draggedTo);
-                        }
-                    };
+                    playbackService.moveItemInQueue(draggedFrom, draggedTo);
+
+                    // If position dragged is above current song, start playing.
+                    if (draggedTo <= offset) {
+                        playbackService.seekToSong(draggedTo);
+                    }
+
+                    refreshQueue();
                 }
 
                 // Reset tracking
@@ -124,30 +124,21 @@ public class QueueFragment extends BottomSheetDialogFragment {
         refreshQueue();
     }
 
+
     private void refreshQueue() {
-        if (playbackService != null) {
-            // Re-fetch the filtered "Up Next" list starting from the current song
-            List<AudioFile> freshUpNext = playbackService.getUpNext();
-            playlist.clear();
-            playlist.addAll(freshUpNext);
+        List<AudioFile> freshUpNext = playbackService.getUpNext();
 
-            // Update highlight
-            AudioFile currentSong = playbackService.getCurrentSong();
-            if (currentSong != null) {
-                songAdapter.setCurrentlyPlaying(currentSong.getFilePath());
-            }
+        songAdapter.setSongs(freshUpNext);
 
-            songAdapter.notifyDataSetChanged();
+        AudioFile currentSong = playbackService.getCurrentSong();
+        if (currentSong != null) {
+            songAdapter.setCurrentlyPlaying(currentSong.getFilePath());
         }
     }
 
     private void onQueueSongClick(int position) {
+        if (playbackService == null) return;
 
-        if (playbackService == null) {
-            return;
-        }
-
-        int index = playbackService.getCurrentIndex() + position;
-        playbackService.play(index);
+        playbackService.seekToSong(playbackService.getCurrentIndex() + position);
     }
 }

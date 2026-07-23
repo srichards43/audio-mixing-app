@@ -13,23 +13,63 @@
         android:orientation="vertical">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dragBar"
             android:layout_width="match_parent"
             android:layout_height="20dp"
             android:background="@color/secondaryMenuBar">
 
             <ImageView
-                android:id="@+id/imageView4"
-                android:layout_width="50dp"
+                android:id="@+id/imageView5"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:scaleType="fitXY"
+                android:tint="@color/text"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@android:drawable/button_onoff_indicator_off" />
+                app:srcCompat="@drawable/drag_handle" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:backgroundTint="@color/secondaryMenuBar">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/queue_header"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/div"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/shuffleButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:scaleType="fitCenter"
+                android:tint="@color/secondaryText"
+                app:layout_constraintBottom_toTopOf="@+id/div"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/shuffle" />
+
+            <ImageView
+                android:id="@+id/div"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:backgroundTint="?attr/colorSurface"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/gradient_div" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView

@@ -80,8 +80,9 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
 
         List<AudioFile> songs = loadAudioFiles(musicDirectory);
 
-        // Fill recycler view with songs, link adapter to fragment for interface calls
+        // Fill recycler view with unfiltered songs, link adapter to fragment for interface calls
         songAdapter = new SongAdapter(songs, this, savedContext);
+        songAdapter.filterSongs("", sortCategory, isAscending);
         recyclerView.setAdapter(songAdapter);
 
 

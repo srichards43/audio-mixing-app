@@ -168,6 +168,27 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     }
 
     /**
+     * Update recyclerview with new playlist of songs
+     * @param songs list of songs
+     */
+    public void setSongs(List<AudioFile> songs) {
+        this.songs.clear();
+        this.songs.addAll(songs);
+
+        this.filteredSongs.clear();
+        this.filteredSongs.addAll(songs);
+
+        notifyDataSetChanged();
+    }
+
+    public void moveItem(int from, int to) {
+        AudioFile item = filteredSongs.remove(from);
+        filteredSongs.add(to, item);
+
+        notifyItemMoved(from, to);
+    }
+
+    /**
      * Sort songs based on a category selected in the spinner, separated from filterSongs to avoid
      * unnecessary overhead for spinner select/direction button click
      * @param category, category to sort by

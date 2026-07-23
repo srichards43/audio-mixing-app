@@ -155,16 +155,19 @@ public class MusicPlaybackService extends Service {
 
     // Play song from audioFile
     public void play(int position) {
+        player.play();
+    }
+
+    /**
+     * Jump to a song in the current playlist
+     * @param position of song in playlist
+     */
+    public void seekToSong(int position) {
         if (position < 0 || position >= playlist.size()) {
             return;
         }
 
-        List<MediaItem> mediaItems = new ArrayList<>();
-        for(AudioFile song : playlist){
-            mediaItems.add(MediaItem.fromUri(song.getFilePath()));
-        }
-        player.setMediaItems(mediaItems, position, 0);
-        player.prepare();
+        player.seekTo(position, 0);
         player.play();
     }
 
@@ -190,6 +193,10 @@ public class MusicPlaybackService extends Service {
 
     public void setSongVolume(float volume) { player.setVolume(volume); }
 
+    /**
+     * Toggle between looping state
+     * @param state 0 = off, 1 = repeat current, 2 = repeat all
+     */
     public void setLoop(int state) {
         switch (state) {
             case 0:
@@ -221,6 +228,9 @@ public class MusicPlaybackService extends Service {
         return player.isPlaying();
     }
 
+    /**
+     * Get song that is currently playing, return null if no songs
+     */
     public AudioFile getCurrentSong() {
         int index = player.getCurrentMediaItemIndex();
         if (index >= 0 && index < playlist.size()) {
@@ -235,6 +245,28 @@ public class MusicPlaybackService extends Service {
         return playlist;
     }
 
+    /**
+     * Set a new playlist at a specified starting point
+     * @param newPlaylist playlist to update with
+     * @param startIndex index of song to start on
+     */
+    public void setPlaylist(List<AudioFile> newPlaylist, int startIndex) {
+        playlist.clear();
+        playlist.addAll(newPlaylist);
+
+        List<MediaItem> mediaItems = new ArrayList<>();
+        for (AudioFile song : playlist) {
+            mediaItems.add(MediaItem.fromUri(song.getFilePath()));
+        }
+
+        player.setMediaItems(mediaItems, startIndex, 0);
+        player.prepare();
+    }
+
+    /**
+     * Retrieve songs that are due to play in playlist, including current song.
+     * @return list of audiofiles
+     */
     public List<AudioFile> getUpNext() {
         int current = player.getCurrentMediaItemIndex();
         if (current == -1 || playlist.isEmpty()) return new ArrayList<>();
@@ -242,6 +274,11 @@ public class MusicPlaybackService extends Service {
         return new ArrayList<>(playlist.subList(current, playlist.size()));
     }
 
+    /**
+     * Move item within a playlist
+     * @param from initial pos in playlist
+     * @param to new pos in playlist
+     */
     public void moveItemInQueue(int from, int to) {
         if (from >= 0 && from < playlist.size()) {
             if (to >= 0 && to < playlist.size()) {

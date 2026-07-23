@@ -44,22 +44,15 @@
             android:id="@+id/headingDivider"
             android:layout_width="match_parent"
             android:layout_height="3dp"
-            android:background="?attr/colorSurface" />
+            android:background="@drawable/gradient_div"
+            android:backgroundTint="?attr/colorSurface" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
-
-            <View
-                android:id="@+id/divider"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/colorSurface"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:id="@+id/textView1"
@@ -84,20 +77,19 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/gradient_div"
+            android:backgroundTint="?attr/colorSurface" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
-
-            <View
-                android:id="@+id/divider2"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/colorSurface"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -114,7 +106,7 @@
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/vibrationsSwitch"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginStart="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView6"
@@ -122,6 +114,13 @@
                 app:thumbTint="?attr/colorPrimary"
                 app:trackTint="@color/switch_track_color" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/gradient_div"
+            android:backgroundTint="?attr/colorSurface" />
 
         <TextView
             android:id="@+id/audioHeader"
@@ -138,22 +137,15 @@
             android:id="@+id/headingDivider2"
             android:layout_width="match_parent"
             android:layout_height="3dp"
-            android:background="?attr/colorSurface" />
+            android:background="@drawable/gradient_div"
+            android:backgroundTint="?attr/colorSurface" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
-
-            <View
-                android:id="@+id/divider3"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/colorSurface"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -176,6 +168,7 @@
                 android:singleLine="false"
                 android:text="@string/settings_path_button"
                 android:textSize="14sp"
+                app:cornerRadius="10dp"
                 app:iconSize="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -183,6 +176,13 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/gradient_div"
+            android:backgroundTint="?attr/colorSurface" />
 
     </LinearLayout>
 

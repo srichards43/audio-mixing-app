@@ -76,7 +76,8 @@
                 android:id="@+id/panelLoopButton"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless">
 
                 <ImageView
                     android:id="@+id/loopIcon"

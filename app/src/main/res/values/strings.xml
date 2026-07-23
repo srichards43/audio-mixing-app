@@ -41,4 +41,7 @@
         <item>Duration</item>
     </string-array>
 
+    <!--Queue fragment strings-->
+    <string name="queue_header">Up Next</string>
+
 </resources>

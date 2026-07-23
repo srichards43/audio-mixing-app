@@ -1,5 +1,6 @@
 package com.example.audiomixer.activities;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -142,6 +143,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppPreferences.applyTheme(this);
@@ -196,6 +198,16 @@ public class MainActivity extends AppCompatActivity
         songToolbar.setTranslationY(120f); // Hide initially
 
         songSeekBar = songMiniplayer.findViewById(R.id.songPositionSeekBar);
+
+        // Add listener to block and pass click down to panel if closed, otherwise allow seeking
+        songSeekBar.setOnTouchListener((v, event) -> {
+            if (!isSongPanelOpen) {
+                toggleSongPanel();
+                return true;
+            }
+            return false;
+        });
+
         songSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -271,7 +283,6 @@ public class MainActivity extends AppCompatActivity
 
         if (isSongPanelOpen) {
             // Open
-            songSeekBar.setOnTouchListener(null);
             songSeekBar.setThumb(thumb);
 
             // Manually set thumb to current time (avoids 1s delay from service updating pos)
@@ -292,7 +303,6 @@ public class MainActivity extends AppCompatActivity
 
         } else {
             // Close
-            songSeekBar.setOnTouchListener((v, event) -> true);
             songSeekBar.setThumb(invisibleThumb);
 
             songToolbar.animate().translationY(120f).setDuration(PANEL_ANIMATION_DURATION).start();
@@ -402,7 +412,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSongSelected(List<AudioFile> playlist, int position) {
         if (serviceBound) {
-            playbackService.setPlaylist(playlist);
+            playbackService.setPlaylist(playlist, position);
             playbackService.play(position);
             updateSongDetails();
             pauseOrResume();
