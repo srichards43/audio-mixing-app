@@ -24,7 +24,7 @@
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
-        android:layout_width="409dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -86,7 +86,7 @@
                     android:layout_gravity="center_horizontal"
                     android:paddingTop="5dp"
                     android:paddingBottom="5dp"
-                    app:srcCompat="@drawable/loop"
+                    app:srcCompat="@drawable/ic_loop"
                     app:tint="@color/secondaryText" />
 
                 <TextView
@@ -107,7 +107,7 @@
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/skip_previous_button"
-                app:srcCompat="@drawable/skip_previous"
+                app:srcCompat="@drawable/ic_skip_previous"
                 app:tint="@color/secondaryText" />
 
             <ImageButton
@@ -117,7 +117,7 @@
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/pause_button"
-                app:srcCompat="@drawable/pause"
+                app:srcCompat="@drawable/ic_pause"
                 app:tint="@color/secondaryText" />
 
             <ImageButton
@@ -127,7 +127,7 @@
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/skip_next_button"
-                app:srcCompat="@drawable/skip_next"
+                app:srcCompat="@drawable/ic_skip_next"
                 app:tint="@color/secondaryText" />
 
             <ImageButton
@@ -137,7 +137,7 @@
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/queue_button"
-                app:srcCompat="@drawable/queue"
+                app:srcCompat="@drawable/ic_queue"
                 app:tint="@color/secondaryText" />
 
         </LinearLayout>
@@ -145,7 +145,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/songPanel"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
@@ -158,8 +158,12 @@
                 android:id="@+id/songAlbumCover"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@android:drawable/ic_menu_report_image" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -226,7 +230,7 @@
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
             android:progressBackgroundTint="@android:color/transparent"
-            android:thumb="@drawable/invisible_thumb"
+            android:thumb="@drawable/ic_invisible_thumb"
             android:thumbTint="?attr/colorPrimary"
             app:layout_constraintBottom_toTopOf="@+id/songPanel"
             app:layout_constraintEnd_toEndOf="@+id/songPanel"

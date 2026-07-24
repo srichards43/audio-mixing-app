@@ -7,4 +7,5 @@
     <color name="secondaryMenuBar">#E2E2E2</color>
     <color name="primary">#FF2600</color>
     <color name="secondary">#D52F00</color>
+    <color name="sleep">#443186</color>
 </resources>

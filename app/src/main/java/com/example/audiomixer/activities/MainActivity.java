@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity
     private LinearLayout songToolbar;
     private SeekBar songSeekBar;
     private boolean isSongPanelOpen = false; // Store state of song panel
-    private boolean isAmbientButtonOpen = true; // Store state of ambient FAB
+    private boolean isAmbientButtonOpen = false; // Store state of ambient FAB
     private MaterialButton ambientFab;
     private Drawable thumb;
     private Drawable invisibleThumb;
@@ -173,13 +173,16 @@ public class MainActivity extends AppCompatActivity
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
-                    tab.setText("Songs");
+                    tab.setIcon(R.drawable.ic_music);
+                    //tab.setText("Music");
                     break;
                 case 1:
-                    tab.setText("Home");
+                    tab.setIcon(R.drawable.ic_home);
+                    //tab.setText("Home");
                     break;
                 case 2:
-                    tab.setText("Ambience");
+                    tab.setIcon(R.drawable.ic_ambient);
+                    //tab.setText("Ambient");
                     break;
             }
         }).attach();
@@ -229,10 +232,10 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        thumb = ResourcesCompat.getDrawable(getResources(), R.drawable.seekbar_thumb, null);
+        thumb = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_seekbar_thumb, null);
 
         // Thumb with alpha = 0 and width = 1dp to stop visual errors
-        invisibleThumb = ResourcesCompat.getDrawable(getResources(), R.drawable.invisible_thumb, null);
+        invisibleThumb = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_invisible_thumb, null);
 
         songPauseButton = songToolbar.findViewById(R.id.panelPauseButton);
         songPauseButton.setOnClickListener(v -> pauseOrResume());
@@ -272,7 +275,7 @@ public class MainActivity extends AppCompatActivity
 
         ambientFab = findViewById(R.id.ambientFab);
 
-        //ambientFab.setVisibility(View.GONE);
+        ambientFab.setVisibility(View.GONE);
     }
 
     /**
@@ -356,10 +359,10 @@ public class MainActivity extends AppCompatActivity
     private void pauseOrResume() {
         if (playbackService.isPlaying()) {
             playbackService.pause();
-            songPauseButton.setImageResource(R.drawable.play);
+            songPauseButton.setImageResource(R.drawable.ic_play);
         } else {
             playbackService.resume();
-            songPauseButton.setImageResource(R.drawable.pause);
+            songPauseButton.setImageResource(R.drawable.ic_pause);
         }
     }
 

@@ -154,7 +154,10 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         if (directory == null) return audioFiles;
 
         for (DocumentFile file : directory.listFiles()) {
-            if (file.isFile() && Objects.requireNonNull(file.getName()).endsWith(".mp3")) {
+            String type = file.getType();
+
+            // Accept all audio file types
+            if (file.isFile() && type !=null && type.startsWith("audio/")) {
                 MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                 try {
                     retriever.setDataSource(requireContext(), file.getUri());
