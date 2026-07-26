@@ -1,66 +1,177 @@
 package com.example.audiomixer.fragments;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.audiomixer.R;
+import com.example.audiomixer.activities.MainActivity;
+import com.example.audiomixer.adapters.AmbientAdapter;
+import com.example.audiomixer.objects.AudioFile;
+import com.example.audiomixer.utils.AppPreferences;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AmbientFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class AmbientFragment extends Fragment {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbientClickListener {
+
+    public interface OnAmbientSelectListener {
+        void onAmbientSelected(AudioFile ambient);
+    }
+
+    private AmbientAdapter ambientAdapter;
+    private OnAmbientSelectListener onAmbientSelectListener;
+    private TextView splashText;
+    private Uri musicDirectory;
 
     public AmbientFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AmbientFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AmbientFragment newInstance(String param1, String param2) {
-        AmbientFragment fragment = new AmbientFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public void onAttach(@NonNull Context context) {
+        // Connect interface to MainActivity
+        super.onAttach(context);
+        if (context instanceof OnAmbientSelectListener) {
+            onAmbientSelectListener = (OnAmbientSelectListener) context;
+        } else {
+            throw new RuntimeException(context + " must implement onAmbientSelectListener");
+        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        musicDirectory = AppPreferences.getMusicDirectoryUri(this.requireContext());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_ambient, container, false);
+        View view = inflater.inflate(R.layout.fragment_ambient, container, false);
+
+        RecyclerView recyclerView = view.findViewById(R.id.ambientRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        ambientAdapter = new AmbientAdapter(new ArrayList<>(), this, requireContext()); //init with empty arraylist
+        recyclerView.setAdapter(ambientAdapter);
+
+        splashText = view.findViewById(R.id.splashText);
+        // Load ambients from music directory in separate thread.
+        new Thread(() -> {
+            List<AudioFile> ambients = loadAudioFiles();
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    ambientAdapter.setAmbients(ambients);
+                    if (ambients.isEmpty()) {
+                        splashText.setVisibility(View.VISIBLE);
+                        splashText.setText(R.string.nothing_found_error);
+                    } else {
+                        splashText.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
+        recyclerView.setAdapter(ambientAdapter);
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Observe once service is live
+        ((MainActivity)requireActivity()).serviceLiveData.observe(getViewLifecycleOwner(), service -> {
+            service.getCurrentAmbientInternal().observe(getViewLifecycleOwner(), ambience -> {
+                if (ambience != null && ambientAdapter != null) {
+                    ambientAdapter.setCurrentlyPlaying(ambience.getFilePath());
+                }
+            });
+        });
+    }
+
+
+    /**
+     * Loads audio files from the ambient directory
+     * @return a list of audio files
+     */
+    private List<AudioFile> loadAudioFiles() {
+        List<AudioFile> audioFiles = new ArrayList<>();
+        AssetManager assetManager = requireContext().getAssets();
+
+        try {
+            // List all files in ambient assets folder
+            String[] files = assetManager.list("ambient");
+            if (files == null) return audioFiles;
+
+            for (String fileName : files) {
+                if (fileName.endsWith(".mp3") || fileName.endsWith(".m4a") || fileName.endsWith(".ogg")) {
+                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                    String assetPath = "ambient/" + fileName;
+
+                    try {
+                        // Open the asset and get metadata
+                        AssetFileDescriptor afd = assetManager.openFd(assetPath);
+                        retriever.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                        afd.close();
+
+                        String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                        if (title == null || title.isEmpty()) title = fileName;
+
+                        byte[] cover = retriever.getEmbeddedPicture();
+
+                        // Create AudioFile with asset prefix
+                        audioFiles.add(new AudioFile(
+                                title, "Internal", "", 0, "asset:///" + assetPath, cover, System.currentTimeMillis()
+                        ));
+                    } catch (Exception e) {
+                        // Create placeholder metadata so file still playable
+                        audioFiles.add(new AudioFile(fileName, "Internal", "", 0, "asset:///" + assetPath, null, System.currentTimeMillis()));
+                    } finally {
+                        retriever.release();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Log.e("AmbientFragment", "Error loading assets", e);
+        }
+        return audioFiles;
+    }
+
+    /**
+     * Update the currently playing song in the adapter, called from MainActivity
+     * @param songPath path of the song playing
+     */
+    public void updateCurrentSong(String songPath) {
+        ambientAdapter.setCurrentlyPlaying(songPath);
+    }
+
+    /**
+     * Get playlist from adapter and send to mainActivity with position
+     * @param ambient audio file
+     */
+    public void onAmbientClick(AudioFile ambient) {
+        if (onAmbientSelectListener != null) {
+            onAmbientSelectListener.onAmbientSelected(ambient);
+        }
     }
 }

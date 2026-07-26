@@ -20,8 +20,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.audiomixer.R;
+import com.example.audiomixer.activities.MainActivity;
 import com.example.audiomixer.adapters.SongAdapter;
 import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.utils.AppPreferences;
@@ -29,7 +31,6 @@ import com.example.audiomixer.utils.AppPreferences;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class SongFragment extends Fragment implements SongAdapter.OnSongClickListener {
@@ -46,6 +47,7 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
     private String sortCategory = "Added";
     private OnSongSelectListener onSongSelectListener;
     private Context savedContext;
+    private TextView splashText;
 
     public SongFragment() {
         // Required empty public constructor
@@ -78,13 +80,28 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         RecyclerView recyclerView = view.findViewById(R.id.songRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        List<AudioFile> songs = loadAudioFiles(musicDirectory);
-
-        // Fill recycler view with unfiltered songs, link adapter to fragment for interface calls
-        songAdapter = new SongAdapter(songs, this, savedContext);
-        songAdapter.filterSongs("", sortCategory, isAscending);
+        songAdapter = new SongAdapter(new ArrayList<>(), this, savedContext); //init with empty arraylist
         recyclerView.setAdapter(songAdapter);
+        splashText = view.findViewById(R.id.splashText);
 
+        // Load songs from music directory in separate thread.
+        new Thread(() -> {
+            List<AudioFile> songs = loadAudioFiles(musicDirectory);
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    songAdapter.setSongs(songs);
+                    songAdapter.filterSongs("", sortCategory, isAscending);
+
+                    if (songs.isEmpty()) {
+                        splashText.setText(R.string.nothing_found_error);
+                        splashText.setVisibility(View.VISIBLE);
+                    } else {
+                        splashText.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
 
         // Set listener to call filterSongs on search query change
         SearchView songSearch = view.findViewById(R.id.songSearch);
@@ -141,6 +158,20 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         return view;
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Observe when service is live.
+        ((MainActivity)requireActivity()).serviceLiveData.observe(getViewLifecycleOwner(), service -> {
+            service.getCurrentSongInternal().observe(getViewLifecycleOwner(), song -> {
+                if (song != null && songAdapter != null) {
+                    songAdapter.setCurrentlyPlaying(song.getFilePath());
+                }
+            });
+        });
+    }
+
     /**
      * Loads audio files from the music directory
      * @param directoryUri, the uri of the music directory to search
@@ -194,7 +225,8 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
                             album,
                             duration,
                             file.getUri().toString(),
-                            albumCover
+                            albumCover,
+                            file.lastModified()
                     ));
                 } catch (Exception e) {
                     Log.e("SongFragment", "Error loading audio file:", e);
@@ -206,7 +238,8 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
                             "Unknown",
                             0,
                             file.getUri().toString(),
-                            null
+                            null,
+                            file.lastModified()
                     ));
                 } finally {
                     try {
@@ -220,14 +253,6 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         }
 
         return audioFiles;
-    }
-
-    /**
-     * Update the currently playing song in the adapter, called from MainActivity
-     * @param songPath path of the song playing
-     */
-    public void updateCurrentSong(String songPath) {
-        songAdapter.setCurrentlyPlaying(songPath);
     }
 
     /**

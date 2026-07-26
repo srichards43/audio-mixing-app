@@ -29,6 +29,7 @@ import java.util.List;
 
 public class MusicPlaybackService extends Service {
     private ExoPlayer player;
+    private ExoPlayer ambientPlayer; // Low maintenance player for ambient sounds
     private MediaSessionCompat mediaSession;
     private final IBinder binder = new LocalBinder();
     private Handler handler;
@@ -36,6 +37,7 @@ public class MusicPlaybackService extends Service {
     private final List<AudioFile> playlist = new ArrayList<>();
     private final MutableLiveData<Long> currentPositionInSongInternal = new MutableLiveData<>();
     private final MutableLiveData<AudioFile> currentSongInternal = new MutableLiveData<>();
+    private final MutableLiveData<AudioFile> currentAmbientInternal = new MutableLiveData<>();
     String channelId = "music_channel";
 
 
@@ -49,10 +51,13 @@ public class MusicPlaybackService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        // Initialise ExoPlayer and MediaSession
+        // Initialise ExoPlayers
         player = new ExoPlayer.Builder(this).build();
         mediaSession = new MediaSessionCompat(this, "MusicService");
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
+
+        ambientPlayer = new ExoPlayer.Builder(this).build();
+        ambientPlayer.setRepeatMode(ExoPlayer.REPEAT_MODE_ALL);
 
         // Set actions for android compatibility
         PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
@@ -124,6 +129,19 @@ public class MusicPlaybackService extends Service {
             }
         };
     }
+
+    // Kill players and service when app is closed.
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+
+        if (player != null) player.stop();
+        if (ambientPlayer != null) ambientPlayer.stop();
+
+        stopForeground(true);
+        stopSelf();
+    }
+
     public MusicPlaybackService() {
     }
 
@@ -192,6 +210,8 @@ public class MusicPlaybackService extends Service {
     }
 
     public void setSongVolume(float volume) { player.setVolume(volume); }
+    public float getSongVolume() { return player.getVolume(); }
+
 
     /**
      * Toggle between looping state
@@ -293,7 +313,6 @@ public class MusicPlaybackService extends Service {
         throw new IllegalArgumentException("Invalid 'from' index");
     }
 
-
     public LiveData<AudioFile> getCurrentSongInternal() {
         return currentSongInternal;
     }
@@ -301,20 +320,47 @@ public class MusicPlaybackService extends Service {
     public int getCurrentIndex() {
         return player.getCurrentMediaItemIndex();
     }
+    public int getRepeatMode() { return player.getRepeatMode(); }
 
     private void onSongChanged(AudioFile newSong) {
         currentSongInternal.postValue(newSong);
     }
 
-    public void stop() {
-        player.stop();
-        stopForeground(true);
+    public void playAmbient(AudioFile ambient) {
+        MediaItem mediaItem = MediaItem.fromUri(ambient.getFilePath());
+        ambientPlayer.setMediaItem(mediaItem);
+        ambientPlayer.prepare();
+        ambientPlayer.play();
+        currentAmbientInternal.postValue(ambient);
+    }
+
+    public void pauseAmbient() {
+        ambientPlayer.pause();
+    }
+
+    public void resumeAmbient() {
+        ambientPlayer.play();
+    }
+
+    public boolean isAmbientPlaying() {
+        return ambientPlayer.isPlaying();
+    }
+
+    public void setAmbientVolume(float volume) {
+        ambientPlayer.setVolume(volume);
+    }
+
+    public float getAmbientVolume() { return ambientPlayer.getVolume(); }
+
+    public LiveData<AudioFile> getCurrentAmbientInternal() {
+        return currentAmbientInternal;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         player.release();
+        ambientPlayer.release();
         mediaSession.release();
     }
 }

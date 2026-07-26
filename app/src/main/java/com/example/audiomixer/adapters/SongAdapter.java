@@ -31,16 +31,16 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         void onPlayClick(int position);
     }
 
-    private final List<AudioFile> songs; // All available songs
+    private final List<AudioFile> songFiles; // All available songs
     private final List<AudioFile> filteredSongs; // Songs that match search query (default: all)
     private final OnSongClickListener listener;
     private final int colorPrimary;
     private final int colorDefault;
     private String currentlyPlayingPath = null;
 
-    public SongAdapter(List<AudioFile> songs, OnSongClickListener listener, Context context) {
-        this.songs = new ArrayList<>(songs);
-        this.filteredSongs = new ArrayList<>(songs);
+    public SongAdapter(List<AudioFile> songFiles, OnSongClickListener listener, Context context) {
+        this.songFiles = new ArrayList<>(songFiles);
+        this.filteredSongs = new ArrayList<>(songFiles);
         this.listener = listener;
 
         // Get colorPrimary from theme
@@ -87,7 +87,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
             holder.albumCover.setImageResource(android.R.drawable.ic_menu_report_image);
         }
 
-        holder.songConstraint.setOnClickListener(v -> {
+        holder.itemView.setOnClickListener(v -> {
             listener.onPlayClick(position);
             setCurrentlyPlaying(songPath);
         });
@@ -107,7 +107,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     }
 
     /**
-     * Set the currently playing song in the list to update the UI
+     * Updates the highlighted item in the list
      * @param path of the audioFile
      */
     public void setCurrentlyPlaying(String path) {
@@ -123,7 +123,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         if (newPos != -1) {
             notifyItemChanged(newPos);
         }
-
     }
 
     /**
@@ -153,10 +152,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public void filterSongs(String query, String category, boolean isAscending) {
         filteredSongs.clear();
         if (query == null || query.isEmpty()) {
-            filteredSongs.addAll(songs);
+            filteredSongs.addAll(songFiles);
         } else {
             query = query.toLowerCase();
-            for (AudioFile song : songs) {
+            for (AudioFile song : songFiles) {
                 if (song.getTitle().toLowerCase().contains(query) ||
                         song.getArtist().toLowerCase().contains(query) ||
                         song.getAlbum().toLowerCase().contains(query)) {
@@ -172,8 +171,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
      * @param songs list of songs
      */
     public void setSongs(List<AudioFile> songs) {
-        this.songs.clear();
-        this.songs.addAll(songs);
+        this.songFiles.clear();
+        this.songFiles.addAll(songs);
 
         this.filteredSongs.clear();
         this.filteredSongs.addAll(songs);
@@ -227,15 +226,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         ImageView albumCover;
         ImageButton playButton;
 
-        ConstraintLayout songConstraint;
-
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.songTitle);
             songInfo = itemView.findViewById(R.id.songInfo);
             duration = itemView.findViewById(R.id.songDuration);
             albumCover = itemView.findViewById(R.id.songAlbumCover);
-            songConstraint = itemView.findViewById(R.id.songConstraint);
         }
     }
 }

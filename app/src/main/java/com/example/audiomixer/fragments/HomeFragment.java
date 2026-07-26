@@ -8,14 +8,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.audiomixer.R;
+import com.example.audiomixer.activities.MainActivity;
 import com.example.audiomixer.activities.SettingsActivity;
 import com.example.audiomixer.objects.AudioFile;
+import com.example.audiomixer.services.MusicPlaybackService;
 
 import java.util.List;
 
@@ -97,6 +100,24 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Sync when service is live.
+        ((MainActivity)requireActivity()).serviceLiveData.observe(getViewLifecycleOwner(), service -> {
+            float songVol = service.getSongVolume() * 100;
+            float ambientVol = service.getAmbientVolume() * 100;
+
+            songVolumeSeekBar.setProgress(songVol);
+            ambientVolumeSeekBar.setProgress(ambientVol);
+
+            // Update labels manually
+            songVolumeDisplay.setText(String.valueOf((int) songVol));
+            ambientVolumeDisplay.setText(String.valueOf((int) ambientVol));
+        });
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -114,7 +135,7 @@ public class HomeFragment extends Fragment {
 
         ambientVolumeSeekBar.setOnSeekBarChangeListener(volumeListener);
 
-        // Initialise labels
+        // Initialise volume dial listeners.
         volumeListener.onProgressChanged(songVolumeSeekBar, songVolumeSeekBar.getProgress(), false);
         volumeListener.onProgressChanged(ambientVolumeSeekBar, ambientVolumeSeekBar.getProgress(), false);
 

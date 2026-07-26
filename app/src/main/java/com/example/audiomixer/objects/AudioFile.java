@@ -14,21 +14,14 @@ public class AudioFile {
     private final String filePath;
     private final long createdAt;
 
-    public AudioFile(String title, String artist, String album, long duration, String filePath, byte[] albumCover) {
+    public AudioFile(String title, String artist, String album, long duration, String filePath, byte[] albumCover, long createdAt) {
         this.title = Objects.requireNonNullElse(title, "Unknown");
         this.artist = Objects.requireNonNullElse(artist, "Unknown");
         this.album = Objects.requireNonNullElse(album, "Unknown");
         this.duration = duration;
         this.filePath = Objects.requireNonNull(filePath);
         this.albumCover = albumCover;
-
-        // Get time the file was created
-        File file = new File(filePath);
-        if (file.exists()) {
-            this.createdAt = file.lastModified();
-        } else {
-            this.createdAt = System.currentTimeMillis(); // fallback to current time
-        }
+        this.createdAt = createdAt;
     }
 
     public String getTitle() {

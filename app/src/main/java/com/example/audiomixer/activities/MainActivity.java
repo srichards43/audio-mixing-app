@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -24,16 +25,19 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.MutableLiveData;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.adapters.PagerAdapter;
+import com.example.audiomixer.fragments.AmbientFragment;
 import com.example.audiomixer.fragments.HomeFragment;
 import com.example.audiomixer.fragments.QueueFragment;
 import com.example.audiomixer.fragments.SongFragment;
@@ -49,7 +53,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
-        implements SongFragment.OnSongSelectListener, HomeFragment.OnVolumeChangeListener {
+        implements SongFragment.OnSongSelectListener, HomeFragment.OnVolumeChangeListener, AmbientFragment.OnAmbientSelectListener {
 
     private ConstraintLayout songMiniplayer;
     private ConstraintLayout songPanel;
@@ -57,7 +61,9 @@ public class MainActivity extends AppCompatActivity
     private SeekBar songSeekBar;
     private boolean isSongPanelOpen = false; // Store state of song panel
     private boolean isAmbientButtonOpen = false; // Store state of ambient FAB
-    private MaterialButton ambientFab;
+    private CardView ambientFab;
+    private ImageView ambientCoverImg;
+    private ImageView ambientPauseIcon;
     private Drawable thumb;
     private Drawable invisibleThumb;
     private MusicPlaybackService playbackService;
@@ -79,6 +85,9 @@ public class MainActivity extends AppCompatActivity
     private int colorPrimary;
     private int colorDefault;
 
+    public final MutableLiveData<MusicPlaybackService> serviceLiveData = new MutableLiveData<>();
+
+
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -96,21 +105,10 @@ public class MainActivity extends AppCompatActivity
             // Observe when song changes, call updateSongDetails()
             playbackService.getCurrentSongInternal().observe(MainActivity.this, song -> {
                 updateSongDetails();
-
-                // Notify SongFragment to update adapter UI
-                SongFragment fragment = (SongFragment) getSupportFragmentManager()
-                        .findFragmentByTag("f0");
-                if (fragment != null) {
-                    fragment.updateCurrentSong(song.getFilePath());
-                }
             });
 
-            // Check if song is already playing
-            AudioFile currentSong = playbackService.getCurrentSong();
-            if (currentSong != null) {
-                songMiniplayer.setVisibility(View.VISIBLE);
-                updateSongDetails();
-            }
+            serviceLiveData.setValue(playbackService);
+            SyncUIWithService();
         }
 
         @Override
@@ -119,19 +117,53 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        Intent intent = new Intent(this, MusicPlaybackService.class);
+    private void SyncUIWithService() {
+        if (playbackService == null) return;
 
-        // Use correct syntax for version >= Oreo
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.startForegroundService(intent);
+        if (playbackService.isPlaying()) {
+            songPauseButton.setImageResource(R.drawable.ic_pause);
         } else {
-            this.startService(intent);
+            songPauseButton.setImageResource(R.drawable.ic_play);
         }
 
-        this.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        int repeatMode = playbackService.getRepeatMode();
+
+        // Map playback vals to activity vals
+        switch (repeatMode) {
+            case 1:
+                loopState =2;
+                break;
+            case 2:
+                loopState = 1;
+                break;
+            default: loopState = 0;
+        }
+
+        updateLoopUI();
+
+        AudioFile currentSong = playbackService.getCurrentSong();
+        if (currentSong != null) {
+            openSongMiniplayer();
+        }
+
+        AudioFile currentAmbient = playbackService.getCurrentAmbientInternal().getValue();
+        if (currentAmbient != null)
+        {
+            openAmbientDisc();
+            if (playbackService.isAmbientPlaying())
+            {
+                spinAmbientDisk();
+            } else {
+                ambientPauseIcon.setVisibility(View.VISIBLE);
+            }
+
+            if (currentAmbient.getAlbumCover() != null) {
+                Bitmap bmp = BitmapFactory.decodeByteArray(currentAmbient.getAlbumCover(), 0, currentAmbient.getAlbumCover().length);
+                ambientCoverImg.setImageBitmap(bmp);
+            } else {
+                ambientCoverImg.setImageResource(R.drawable.shape_circle);
+            }
+        }
     }
 
     @Override
@@ -192,6 +224,17 @@ public class MainActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Intent intent = new Intent(this, MusicPlaybackService.class);
+
+        // Use correct syntax for version >= Oreo
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.startForegroundService(intent);
+        } else {
+            this.startService(intent);
+        }
+
+        this.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         songMiniplayer = findViewById(R.id.songPlayer);
         songPanel = songMiniplayer.findViewById(R.id.songPanel);
@@ -273,8 +316,13 @@ public class MainActivity extends AppCompatActivity
 
         songMiniplayer.setVisibility(View.GONE);
 
+        // Ambient UI
         ambientFab = findViewById(R.id.ambientFab);
-
+        ambientFab.setOnClickListener(v -> {
+            pauseOrResumeAmbience();
+        });
+        ambientCoverImg = findViewById(R.id.ambientCover);
+        ambientPauseIcon = findViewById(R.id.ambientPauseIcon);
         ambientFab.setVisibility(View.GONE);
     }
 
@@ -335,7 +383,13 @@ public class MainActivity extends AppCompatActivity
             loopState++;
         }
 
-        // Set UI to match state
+        updateLoopUI();
+
+        // Set service state
+        playbackService.setLoop(loopState);
+    }
+
+    private void updateLoopUI() {
         switch (loopState) {
             case 0:
                 loopIcon.setImageTintList(ColorStateList.valueOf(colorDefault));
@@ -348,9 +402,6 @@ public class MainActivity extends AppCompatActivity
                 loopIcon.setImageTintList(ColorStateList.valueOf(colorPrimary));
                 loopPlaylistIndicator.setVisibility(View.VISIBLE);
         }
-
-        // Set service state
-        playbackService.setLoop(loopState);
     }
 
     /**
@@ -380,13 +431,18 @@ public class MainActivity extends AppCompatActivity
 
         long duration = song.getDuration(); // Cast to int for seekbar
         songSeekBar.setMax((int) duration);
-        songSeekBar.setProgress(0); // Instantly update to avoid visual errors
+
+        Long rawPos = playbackService.getCurrentPositionInSong().getValue();
+        long songPos = 0;
+        if (rawPos != null) {
+            songPos = rawPos;
+        }
+
+        songSeekBar.setProgress((int) songPos);
 
         songDurationText.setText("/");
         songDurationText.append(TimeUtility.getFormattedDuration(duration));
-
-        // Instantly set currentTime display to 0 to avoid tick based load in
-        songCurrentTimeText.setText(TimeUtility.getFormattedDuration(0));
+        songCurrentTimeText.setText(TimeUtility.getFormattedDuration((int) songPos));
 
         if (song.getAlbumCover() != null) {
             Bitmap bmp = BitmapFactory.decodeByteArray(song.getAlbumCover(), 0, song.getAlbumCover().length);
@@ -417,7 +473,7 @@ public class MainActivity extends AppCompatActivity
         if (serviceBound) {
             playbackService.setPlaylist(playlist, position);
             playbackService.play(position);
-            updateSongDetails();
+            openSongMiniplayer();
             pauseOrResume();
 
             songMiniplayer.setVisibility(View.VISIBLE);
@@ -435,8 +491,81 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void openSongMiniplayer() {
+        songMiniplayer.setVisibility(View.VISIBLE);
+
+        if (ambientFab.getVisibility() == View.VISIBLE && !isSongPanelOpen) {
+            ambientFab.setTranslationY(120f);
+        }
+
+        updateSongDetails();
+    }
+
+    private void openAmbientDisc() {
+        isAmbientButtonOpen = true;
+        ambientFab.setVisibility(View.VISIBLE);
+
+        if (songMiniplayer.getVisibility() == View.VISIBLE && !isSongPanelOpen) {
+            ambientFab.setTranslationY(120f);
+        } else {
+            ambientFab.setTranslationY(0f);
+        }
+    }
+
+    private void pauseOrResumeAmbience() {
+        if (playbackService.isAmbientPlaying()) {
+            playbackService.pauseAmbient();
+            ambientPauseIcon.setVisibility(View.VISIBLE);
+            ambientCoverImg.animate().cancel(); // cancel spin
+        } else {
+            playbackService.resumeAmbient();
+            ambientPauseIcon.setVisibility(View.GONE);
+            spinAmbientDisk();
+        }
+    }
+
     @Override
     public void onAmbientVolumeChanged(float volume) {
+        if (playbackService != null) {
+            playbackService.setAmbientVolume(volume);
+        }
+    }
 
+    @Override
+    public void onAmbientSelected(AudioFile ambient) {
+        if (serviceBound) {
+            playbackService.playAmbient(ambient);
+
+            if (ambientFab.getVisibility() == View.GONE) {
+                openAmbientDisc();
+            }
+
+            spinAmbientDisk();
+
+            if (ambient.getAlbumCover() != null) {
+                Bitmap bmp = BitmapFactory.decodeByteArray(ambient.getAlbumCover(), 0, ambient.getAlbumCover().length);
+                ambientCoverImg.setImageBitmap(bmp);
+            } else {
+                ambientCoverImg.setImageResource(R.drawable.shape_circle);
+            }
+        }
+
+    }
+
+    private void spinAmbientDisk() {
+        ambientCoverImg.animate().rotationBy(360f).setDuration(3000).setInterpolator(new LinearInterpolator())
+                .withEndAction(this::spinAmbientDisk).start();
+    }
+
+    /**
+     * Expose playback service to fragments
+     * @return the service
+     */
+    public MusicPlaybackService getPlaybackService() {
+        if (serviceBound) {
+            return playbackService;
+        } else {
+            return null;
+        }
     }
 }
