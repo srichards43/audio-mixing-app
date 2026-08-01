@@ -16,9 +16,12 @@ It gives users control of two audio sources together: their music library and lo
 
 ## Screenshots
 
-<img width="400" height="885" alt="image" src="https://github.com/user-attachments/assets/52d66d77-e355-45e8-ab76-f149d1706a67" />
+<img width="400" height="892" alt="image" src="https://github.com/user-attachments/assets/82a36ee9-11d7-464b-b670-0a20e5b89666" />
 
 <img width="400" height="895" alt="image" src="https://github.com/user-attachments/assets/bb2e80ac-12bb-4854-b662-6c44385af64d" />
+
+<img width="400" height="896" alt="image" src="https://github.com/user-attachments/assets/56dc7bd9-4f6f-48b6-bf73-3c38c9295390" />
+
 
 ## Built With
 
