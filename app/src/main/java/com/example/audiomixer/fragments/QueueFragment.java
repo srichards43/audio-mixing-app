@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,9 +23,8 @@ import java.util.List;
 
 public class QueueFragment extends BottomSheetDialogFragment {
 
-    private MusicPlaybackService playbackService;
+    private final MusicPlaybackService playbackService;
     private SongAdapter songAdapter;
-    private List<AudioFile> playlist;
 
     // Vars used to track where user is dragging a song to be used when released.
     private int draggingFrom = -1;
@@ -116,6 +116,13 @@ public class QueueFragment extends BottomSheetDialogFragment {
 
         AudioFile currentSong = playbackService.getCurrentSong();
         songAdapter.setCurrentlyPlaying(currentSong.getFilePath());
+
+        ImageButton shuffleButton = view.findViewById(R.id.shuffleButton);
+        shuffleButton.setOnClickListener(v -> {
+            playbackService.shufflePlaylist();
+            refreshQueue();
+        });
+
 
         return view;
     }

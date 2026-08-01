@@ -159,28 +159,12 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/secondaryText"
                     android:contentDescription="@string/settings_button"
-                    android:onClick="launchSettings"
                     android:scaleType="fitCenter"
                     android:scaleX="1"
                     android:scaleY="1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_settings" />
-
-                <ImageButton
-                    android:id="@+id/sleepTimerButton"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/settings_button"
-                    android:scaleType="fitCenter"
-                    android:scaleX="1"
-                    android:scaleY="1"
-                    app:tint="@color/secondaryText"
-                    app:layout_constraintEnd_toEndOf="@+id/settingsButton"
-                    app:layout_constraintTop_toBottomOf="@+id/settingsButton"
-                    app:srcCompat="@drawable/ic_sleep_timer" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -192,7 +176,7 @@
                 app:layout_constraintGuide_percent="0.5" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/sleepTimerButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/sleep"

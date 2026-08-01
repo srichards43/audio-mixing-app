@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
@@ -25,11 +26,12 @@ import com.example.audiomixer.R;
 import com.example.audiomixer.objects.AudioFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MusicPlaybackService extends Service {
     private ExoPlayer player;
-    private ExoPlayer ambientPlayer; // Low maintenance player for ambient sounds
+    private ExoPlayer ambiencePlayer; // Low maintenance player for ambient sounds
     private MediaSessionCompat mediaSession;
     private final IBinder binder = new LocalBinder();
     private Handler handler;
@@ -38,8 +40,75 @@ public class MusicPlaybackService extends Service {
     private final MutableLiveData<Long> currentPositionInSongInternal = new MutableLiveData<>();
     private final MutableLiveData<AudioFile> currentSongInternal = new MutableLiveData<>();
     private final MutableLiveData<AudioFile> currentAmbientInternal = new MutableLiveData<>();
-    String channelId = "music_channel";
+    final String channelId = "music_channel";
 
+    private final Handler timerHandler = new Handler(Looper.getMainLooper());
+
+    // Music timer state
+    private long musicEndTime = 0;
+    private long musicFadeDuration = 0;
+    private float musicBaseVolume = 1.0f;
+    private final MutableLiveData<Long> musicTimerRemaining = new MutableLiveData<>(null);
+    private boolean isMusicTimerPaused = false;
+    private long musicInitialDuration = 0;
+
+    // Ambience timer state
+    private long ambienceEndTime = 0;
+    private long ambienceFadeDuration = 0;
+    private float ambienceBaseVolume = 1.0f;
+    private final MutableLiveData<Long> ambienceTimerRemaining = new MutableLiveData<>(null);
+    private boolean isAmbienceTimerPaused = false;
+    private long ambienceInitialDuration = 0;
+
+    private final Runnable musicTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long remaining = musicEndTime - SystemClock.elapsedRealtime();
+
+            // Break once time reaches 0 and reset state
+            if (remaining <= 0) {
+                player.pause();
+                player.setVolume(musicBaseVolume);
+                musicTimerRemaining.postValue(0L);
+                return;
+            }
+
+            musicTimerRemaining.postValue(remaining);
+
+            // Handle Fading
+            if (remaining <= musicFadeDuration && musicFadeDuration > 0) {
+                float fadeProgress = (float) remaining / musicFadeDuration;
+                player.setVolume(musicBaseVolume * fadeProgress);
+            }
+
+            timerHandler.postDelayed(this, 1000); // Check again in 1 second
+        }
+    };
+
+    private final Runnable ambienceTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long remaining = ambienceEndTime - SystemClock.elapsedRealtime();
+
+            // Break once time reaches 0 and reset state
+            if (remaining <= 0) {
+                player.pause();
+                player.setVolume(ambienceBaseVolume);
+                ambienceTimerRemaining.postValue(0L);
+                return;
+            }
+
+            ambienceTimerRemaining.postValue(remaining);
+
+            // Handle Fading
+            if (remaining <= ambienceFadeDuration && ambienceFadeDuration > 0) {
+                float fadeProgress = (float) remaining / ambienceFadeDuration;
+                player.setVolume(ambienceBaseVolume * fadeProgress);
+            }
+
+            timerHandler.postDelayed(this, 1000); // Check again in 1 second
+        }
+    };
 
     public class LocalBinder extends Binder {
         public MusicPlaybackService getService() {
@@ -56,8 +125,8 @@ public class MusicPlaybackService extends Service {
         mediaSession = new MediaSessionCompat(this, "MusicService");
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
 
-        ambientPlayer = new ExoPlayer.Builder(this).build();
-        ambientPlayer.setRepeatMode(ExoPlayer.REPEAT_MODE_ALL);
+        ambiencePlayer = new ExoPlayer.Builder(this).build();
+        ambiencePlayer.setRepeatMode(ExoPlayer.REPEAT_MODE_ALL);
 
         // Set actions for android compatibility
         PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
@@ -136,7 +205,7 @@ public class MusicPlaybackService extends Service {
         super.onTaskRemoved(rootIntent);
 
         if (player != null) player.stop();
-        if (ambientPlayer != null) ambientPlayer.stop();
+        if (ambiencePlayer != null) ambiencePlayer.stop();
 
         stopForeground(true);
         stopSelf();
@@ -295,6 +364,43 @@ public class MusicPlaybackService extends Service {
     }
 
     /**
+     * Shuffles the playlist around the current song
+     */
+    public void shufflePlaylist() {
+        if (playlist.size() < 2) return;
+
+        int currentIndex = player.getCurrentMediaItemIndex();
+
+        // Shuffle everything before and after the current song
+        if (currentIndex > 0) {
+            Collections.shuffle(playlist.subList(0, currentIndex));
+        }
+        if (currentIndex < playlist.size() - 1) {
+            Collections.shuffle(playlist.subList(currentIndex + 1, playlist.size()));
+        }
+
+        // Load each side into separate arraylist
+        List<MediaItem> previousSongs = new ArrayList<>();
+        for (int i = 0; i < currentIndex; i++) {
+            previousSongs.add(MediaItem.fromUri(playlist.get(i).getFilePath()));
+        }
+        List<MediaItem> futureSongs = new ArrayList<>();
+        for (int i = currentIndex + 1; i < playlist.size(); i++) {
+            futureSongs.add(MediaItem.fromUri(playlist.get(i).getFilePath()));
+        }
+
+        // Sync with player by swapping out old sub-playlists with new ones
+        if (!previousSongs.isEmpty()) {
+            player.removeMediaItems(0, currentIndex);
+            player.addMediaItems(0, previousSongs);
+        }
+        if (!futureSongs.isEmpty()) {
+            player.removeMediaItems(currentIndex + 1, player.getMediaItemCount());
+            player.addMediaItems(currentIndex + 1, futureSongs);
+        }
+    }
+
+    /**
      * Move item within a playlist
      * @param from initial pos in playlist
      * @param to new pos in playlist
@@ -328,39 +434,144 @@ public class MusicPlaybackService extends Service {
 
     public void playAmbient(AudioFile ambient) {
         MediaItem mediaItem = MediaItem.fromUri(ambient.getFilePath());
-        ambientPlayer.setMediaItem(mediaItem);
-        ambientPlayer.prepare();
-        ambientPlayer.play();
+        ambiencePlayer.setMediaItem(mediaItem);
+        ambiencePlayer.prepare();
+        ambiencePlayer.play();
         currentAmbientInternal.postValue(ambient);
     }
 
     public void pauseAmbient() {
-        ambientPlayer.pause();
+        ambiencePlayer.pause();
     }
 
     public void resumeAmbient() {
-        ambientPlayer.play();
+        ambiencePlayer.play();
     }
 
     public boolean isAmbientPlaying() {
-        return ambientPlayer.isPlaying();
+        return ambiencePlayer.isPlaying();
     }
 
     public void setAmbientVolume(float volume) {
-        ambientPlayer.setVolume(volume);
+        ambiencePlayer.setVolume(volume);
     }
 
-    public float getAmbientVolume() { return ambientPlayer.getVolume(); }
+    public float getAmbientVolume() { return ambiencePlayer.getVolume(); }
 
     public LiveData<AudioFile> getCurrentAmbientInternal() {
         return currentAmbientInternal;
+    }
+
+    public void startMusicSleepTimer(long duration, long fade) {
+        timerHandler.removeCallbacks(musicTimerRunnable);
+        musicBaseVolume = player.getVolume(); // Capture current user volume
+
+        musicInitialDuration = duration;
+        musicEndTime = SystemClock.elapsedRealtime() + duration;
+        musicFadeDuration = fade;
+        isMusicTimerPaused = false;
+
+        musicTimerRemaining.postValue(duration); // post immediately to update UI
+        timerHandler.post(musicTimerRunnable);
+    }
+
+    public void pauseMusicSleepTimer() {
+        if (musicTimerRemaining.getValue() != null) {
+            isMusicTimerPaused = true;
+
+            // Calculate current time (between second postings)
+            long remaining = musicEndTime - SystemClock.elapsedRealtime();
+            musicTimerRemaining.postValue(remaining);
+            timerHandler.removeCallbacks(musicTimerRunnable);
+        }
+    }
+
+    public void resumeMusicSleepTimer() {
+        Long remaining = musicTimerRemaining.getValue();
+        if (remaining != null && remaining > 0) {
+            isMusicTimerPaused = false;
+
+            musicEndTime = SystemClock.elapsedRealtime() + remaining;
+            timerHandler.post(musicTimerRunnable);
+        }
+    }
+
+    public void cancelMusicSleepTimer() {
+        timerHandler.removeCallbacks(musicTimerRunnable);
+        musicTimerRemaining.postValue(null);
+        player.setVolume(musicBaseVolume); // Snap volume back
+    }
+
+    public void resetMusicSleepTimer() {
+        startMusicSleepTimer(musicInitialDuration, musicFadeDuration);
+    }
+
+    public boolean getMusicTimerPaused() {
+        return isMusicTimerPaused;
+    }
+
+    public LiveData<Long> getMusicTimerRemaining() {
+        return musicTimerRemaining;
+    }
+
+    public void startAmbienceSleepTimer(long duration, long fade) {
+        timerHandler.removeCallbacks(ambienceTimerRunnable);
+        ambienceBaseVolume = ambiencePlayer.getVolume(); // Capture current user volume
+
+        ambienceInitialDuration = duration;
+        ambienceEndTime = SystemClock.elapsedRealtime() + duration;
+        ambienceFadeDuration = fade;
+        isAmbienceTimerPaused = false;
+
+        ambienceTimerRemaining.postValue(duration); // post immediately to update UI
+        timerHandler.post(ambienceTimerRunnable);
+    }
+
+    public void pauseAmbienceSleepTimer() {
+        if (ambienceTimerRemaining.getValue() != null) {
+            isAmbienceTimerPaused = true;
+
+            // Calculate current time (between second postings)
+            long remaining = ambienceEndTime - SystemClock.elapsedRealtime();
+            ambienceTimerRemaining.postValue(remaining);
+            timerHandler.removeCallbacks(ambienceTimerRunnable);
+        }
+    }
+
+    public void resumeAmbienceSleepTimer() {
+        Long remaining = ambienceTimerRemaining.getValue();
+        if (remaining != null && remaining > 0) {
+            isAmbienceTimerPaused = false;
+
+            ambienceEndTime = SystemClock.elapsedRealtime() + remaining;
+            timerHandler.post(ambienceTimerRunnable);
+        }
+    }
+
+    public void cancelAmbienceSleepTimer() {
+        timerHandler.removeCallbacks(ambienceTimerRunnable);
+        ambienceTimerRemaining.postValue(null);
+        ambiencePlayer.setVolume(ambienceBaseVolume); // Snap volume back
+    }
+
+    public void resetAmbienceSleepTimer() {
+        startAmbienceSleepTimer(ambienceInitialDuration, ambienceFadeDuration);
+    }
+
+
+    public boolean getAmbienceTimerPaused() {
+        return isAmbienceTimerPaused;
+    }
+
+    public LiveData<Long> getAmbienceTimerRemaining() {
+        return ambienceTimerRemaining;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         player.release();
-        ambientPlayer.release();
+        ambiencePlayer.release();
         mediaSession.release();
     }
 }

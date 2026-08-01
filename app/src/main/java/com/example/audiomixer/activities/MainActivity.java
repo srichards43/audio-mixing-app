@@ -45,7 +45,7 @@ import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.services.MusicPlaybackService;
 import com.example.audiomixer.utils.AppPreferences;
 import com.example.audiomixer.utils.TimeUtility;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -56,30 +56,25 @@ public class MainActivity extends AppCompatActivity
         implements SongFragment.OnSongSelectListener, HomeFragment.OnVolumeChangeListener, AmbientFragment.OnAmbientSelectListener {
 
     private ConstraintLayout songMiniplayer;
-    private ConstraintLayout songPanel;
-    private LinearLayout songToolbar;
+    private MaterialCardView songToolbar;
     private SeekBar songSeekBar;
     private boolean isSongPanelOpen = false; // Store state of song panel
     private boolean isAmbientButtonOpen = false; // Store state of ambient FAB
-    private CardView ambientFab;
+    private CardView ambientDisc;
     private ImageView ambientCoverImg;
+    private boolean spinAmbientDisc = true;
     private ImageView ambientPauseIcon;
     private Drawable thumb;
     private Drawable invisibleThumb;
     private MusicPlaybackService playbackService;
     private boolean serviceBound = false;
     private ImageButton songPauseButton;
-    private ImageButton songNextButton;
-    private ImageButton songPreviousButton;
-    private ImageButton queueButton;
     private TextView songTitle;
     private TextView songInfo;
     private ImageView songAlbumCover;
     private TextView songCurrentTimeText;
     private TextView songDurationText;
-    private final int PANEL_ANIMATION_DURATION = 200;
     private int loopState = 0; // 0 = off, 1 = repeat current, 2 = repeat playlist
-    private FrameLayout loopButton;
     private ImageView loopIcon;
     private TextView loopPlaylistIndicator;
     private int colorPrimary;
@@ -152,7 +147,7 @@ public class MainActivity extends AppCompatActivity
             openAmbientDisc();
             if (playbackService.isAmbientPlaying())
             {
-                spinAmbientDisk();
+                spinAmbientDisc();
             } else {
                 ambientPauseIcon.setVisibility(View.VISIBLE);
             }
@@ -200,7 +195,7 @@ public class MainActivity extends AppCompatActivity
         PagerAdapter pagerAdapter = new PagerAdapter(manager, getLifecycle());
         viewPager.setAdapter(pagerAdapter);
 
-        viewPager.setCurrentItem(1, false);
+        viewPager.setCurrentItem(AppPreferences.getLaunchTab(this), false);
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
@@ -237,10 +232,10 @@ public class MainActivity extends AppCompatActivity
         this.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         songMiniplayer = findViewById(R.id.songPlayer);
-        songPanel = songMiniplayer.findViewById(R.id.songPanel);
+        MaterialCardView songPanel = songMiniplayer.findViewById(R.id.songCard);
         songPanel.setOnClickListener(v -> toggleSongPanel());
 
-        songToolbar = songMiniplayer.findViewById(R.id.toolbarPanel);
+        songToolbar = songMiniplayer.findViewById(R.id.controlCard);
         songToolbar.setTranslationY(120f); // Hide initially
 
         songSeekBar = songMiniplayer.findViewById(R.id.songPositionSeekBar);
@@ -283,26 +278,26 @@ public class MainActivity extends AppCompatActivity
         songPauseButton = songToolbar.findViewById(R.id.panelPauseButton);
         songPauseButton.setOnClickListener(v -> pauseOrResume());
 
-        songNextButton = songToolbar.findViewById(R.id.panelSkipNextButton);
+        ImageButton songNextButton = songToolbar.findViewById(R.id.panelSkipNextButton);
         songNextButton.setOnClickListener(v -> {
             playbackService.skipToNext();
             pauseOrResume();
         });
 
-        songPreviousButton = songToolbar.findViewById(R.id.panelSkipPreviousButton);
+        ImageButton songPreviousButton = songToolbar.findViewById(R.id.panelSkipPreviousButton);
         songPreviousButton.setOnClickListener(v -> {
             playbackService.skipToPrevious();
             pauseOrResume();
         });
 
-        loopButton = songToolbar.findViewById(R.id.panelLoopButton);
+        FrameLayout loopButton = songToolbar.findViewById(R.id.panelLoopButton);
         loopIcon = loopButton.findViewById(R.id.loopIcon);
         loopPlaylistIndicator = loopButton.findViewById(R.id.loopText);
         loopPlaylistIndicator.setVisibility(View.GONE);
 
         loopButton.setOnClickListener(v -> toggleLoop());
 
-        queueButton = songToolbar.findViewById(R.id.queueButton);
+        ImageButton queueButton = songToolbar.findViewById(R.id.queueButton);
         queueButton.setOnClickListener(v -> openQueue());
 
 
@@ -317,13 +312,15 @@ public class MainActivity extends AppCompatActivity
         songMiniplayer.setVisibility(View.GONE);
 
         // Ambient UI
-        ambientFab = findViewById(R.id.ambientFab);
-        ambientFab.setOnClickListener(v -> {
+        ambientDisc = findViewById(R.id.ambientDisc);
+        ambientDisc.setOnClickListener(v -> {
             pauseOrResumeAmbience();
         });
         ambientCoverImg = findViewById(R.id.ambientCover);
         ambientPauseIcon = findViewById(R.id.ambientPauseIcon);
-        ambientFab.setVisibility(View.GONE);
+        ambientDisc.setVisibility(View.GONE);
+
+        spinAmbientDisc = AppPreferences.getAmbientDiscRotation(this);
     }
 
     /**
@@ -332,6 +329,7 @@ public class MainActivity extends AppCompatActivity
     private void toggleSongPanel() {
         isSongPanelOpen = !isSongPanelOpen;
 
+        int PANEL_ANIMATION_DURATION = 200;
         if (isSongPanelOpen) {
             // Open
             songSeekBar.setThumb(thumb);
@@ -349,7 +347,7 @@ public class MainActivity extends AppCompatActivity
 
             // If ambient FAB open, also animate
             if (isAmbientButtonOpen) {
-                ambientFab.animate().translationY(-0f).setDuration(PANEL_ANIMATION_DURATION).start();
+                ambientDisc.animate().translationY(-0f).setDuration(PANEL_ANIMATION_DURATION).start();
             }
 
         } else {
@@ -361,7 +359,7 @@ public class MainActivity extends AppCompatActivity
 
             // If ambient FAB open, also animate
             if (isAmbientButtonOpen) {
-                ambientFab.animate().translationY(120f).setDuration(PANEL_ANIMATION_DURATION).start();
+                ambientDisc.animate().translationY(120f).setDuration(PANEL_ANIMATION_DURATION).start();
             }
         }
     }
@@ -494,8 +492,8 @@ public class MainActivity extends AppCompatActivity
     private void openSongMiniplayer() {
         songMiniplayer.setVisibility(View.VISIBLE);
 
-        if (ambientFab.getVisibility() == View.VISIBLE && !isSongPanelOpen) {
-            ambientFab.setTranslationY(120f);
+        if (ambientDisc.getVisibility() == View.VISIBLE && !isSongPanelOpen) {
+            ambientDisc.setTranslationY(120f);
         }
 
         updateSongDetails();
@@ -503,12 +501,12 @@ public class MainActivity extends AppCompatActivity
 
     private void openAmbientDisc() {
         isAmbientButtonOpen = true;
-        ambientFab.setVisibility(View.VISIBLE);
+        ambientDisc.setVisibility(View.VISIBLE);
 
         if (songMiniplayer.getVisibility() == View.VISIBLE && !isSongPanelOpen) {
-            ambientFab.setTranslationY(120f);
+            ambientDisc.setTranslationY(120f);
         } else {
-            ambientFab.setTranslationY(0f);
+            ambientDisc.setTranslationY(0f);
         }
     }
 
@@ -520,7 +518,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             playbackService.resumeAmbient();
             ambientPauseIcon.setVisibility(View.GONE);
-            spinAmbientDisk();
+            spinAmbientDisc();
         }
     }
 
@@ -531,16 +529,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Begin a new ambient track and update UI
+     * @param ambient to play
+     */
     @Override
     public void onAmbientSelected(AudioFile ambient) {
         if (serviceBound) {
             playbackService.playAmbient(ambient);
 
-            if (ambientFab.getVisibility() == View.GONE) {
+            if (ambientDisc.getVisibility() == View.GONE) {
                 openAmbientDisc();
             }
 
-            spinAmbientDisk();
+            spinAmbientDisc();
+            ambientPauseIcon.setVisibility(View.GONE);
 
             if (ambient.getAlbumCover() != null) {
                 Bitmap bmp = BitmapFactory.decodeByteArray(ambient.getAlbumCover(), 0, ambient.getAlbumCover().length);
@@ -552,9 +555,13 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void spinAmbientDisk() {
+    // Recurring method to spin ambience Disc around
+    private void spinAmbientDisc() {
+        if (!spinAmbientDisc) {
+            return;
+        }
         ambientCoverImg.animate().rotationBy(360f).setDuration(3000).setInterpolator(new LinearInterpolator())
-                .withEndAction(this::spinAmbientDisk).start();
+                .withEndAction(this::spinAmbientDisc).start();
     }
 
     /**

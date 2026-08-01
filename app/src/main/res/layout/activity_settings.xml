@@ -48,8 +48,11 @@
             android:backgroundTint="?attr/colorSurface" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/themeRow"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:padding="8dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
@@ -70,9 +73,10 @@
                 android:id="@+id/themeSpinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:focusable="false"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/textView1"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -85,18 +89,63 @@
             android:backgroundTint="?attr/colorSurface" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/launchTabRow"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:padding="8dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/textView7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:text="@string/settings_vibrations"
+                android:text="@string/settings_launch_tab"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Spinner
+                android:id="@+id/launchTabSpinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:focusable="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/divider6"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/shape_gradient_div"
+            android:backgroundTint="?attr/colorSurface" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ambientDiskRotationRow"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp">
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="@string/settings_disk"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -104,14 +153,15 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/vibrationsSwitch"
+                android:id="@+id/ambientDiskRotationSwitch"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_marginStart="8dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:focusable="false"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/textView6"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:thumbTint="?attr/colorPrimary"
+                app:thumbTint="@color/switch_thumb_color"
                 app:trackTint="@color/switch_track_color" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -141,14 +191,17 @@
             android:backgroundTint="?attr/colorSurface" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/songPathRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:padding="8dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/textView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
@@ -165,24 +218,100 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/menuBar"
+                android:focusable="false"
                 android:singleLine="false"
                 android:text="@string/settings_path_button"
+                android:textColor="@color/text"
                 android:textSize="14sp"
                 app:cornerRadius="10dp"
                 app:iconSize="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/textView6"
+                app:layout_constraintStart_toEndOf="@+id/textView8"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
-            android:id="@+id/divider3"
+            android:id="@+id/divider7"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@drawable/shape_gradient_div"
             android:backgroundTint="?attr/colorSurface" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ambientPathRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp">
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="@string/settings_ambient_path"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/ambientPathButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/menuBar"
+                android:focusable="false"
+                android:singleLine="false"
+                android:text="@string/settings_path_button"
+                android:textColor="@color/text"
+                android:textSize="14sp"
+                app:cornerRadius="10dp"
+                app:iconSize="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textView9"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/divider8"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/shape_gradient_div"
+            android:backgroundTint="?attr/colorSurface" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp">
+
+            <Button
+                android:id="@+id/resetButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/settings_reset_button"
+                android:textColor="@color/textForPrimary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 

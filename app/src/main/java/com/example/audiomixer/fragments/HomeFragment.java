@@ -7,11 +7,13 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.audiomixer.R;
@@ -30,6 +32,7 @@ public class HomeFragment extends Fragment {
     private CircularSeekBar ambientVolumeSeekBar;
     private TextView songVolumeDisplay;
     private TextView ambientVolumeDisplay;
+    private Button sleepTimerButton;
     private HomeFragment.OnVolumeChangeListener onVolumeChangeListener;
 
 
@@ -51,7 +54,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    CircularSeekBar.OnCircularSeekBarChangeListener volumeListener = new CircularSeekBar.OnCircularSeekBarChangeListener () {
+    final CircularSeekBar.OnCircularSeekBarChangeListener volumeListener = new CircularSeekBar.OnCircularSeekBarChangeListener () {
 
         @Override
         public void onStartTrackingTouch(@Nullable CircularSeekBar circularSeekBar) {
@@ -138,6 +141,14 @@ public class HomeFragment extends Fragment {
         // Initialise volume dial listeners.
         volumeListener.onProgressChanged(songVolumeSeekBar, songVolumeSeekBar.getProgress(), false);
         volumeListener.onProgressChanged(ambientVolumeSeekBar, ambientVolumeSeekBar.getProgress(), false);
+
+        FragmentManager manager = requireActivity().getSupportFragmentManager();
+
+        sleepTimerButton = view.findViewById(R.id.sleepTimerButton);
+        sleepTimerButton.setOnClickListener(v -> {
+            SleepTimersFragment fragment = new SleepTimersFragment();
+            fragment.show(manager, "QueueDialog");
+        });
 
         return view;
     }

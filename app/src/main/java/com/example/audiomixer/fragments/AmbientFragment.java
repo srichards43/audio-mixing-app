@@ -39,7 +39,7 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
     private AmbientAdapter ambientAdapter;
     private OnAmbientSelectListener onAmbientSelectListener;
     private TextView splashText;
-    private Uri musicDirectory;
+    private Uri ambientDirectory;
 
     public AmbientFragment() {
         // Required empty public constructor
@@ -59,7 +59,7 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        musicDirectory = AppPreferences.getMusicDirectoryUri(this.requireContext());
+        ambientDirectory = AppPreferences.getAmbientDirectoryUri(this.requireContext());
     }
 
     @Override
@@ -76,7 +76,7 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
         splashText = view.findViewById(R.id.splashText);
         // Load ambients from music directory in separate thread.
         new Thread(() -> {
-            List<AudioFile> ambients = loadAudioFiles();
+            List<AudioFile> ambients = loadAudioFiles(ambientDirectory);
 
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
@@ -114,7 +114,7 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
      * Loads audio files from the ambient directory
      * @return a list of audio files
      */
-    private List<AudioFile> loadAudioFiles() {
+    private List<AudioFile> loadAudioFiles(Uri directoryUri) {
         List<AudioFile> audioFiles = new ArrayList<>();
         AssetManager assetManager = requireContext().getAssets();
 
@@ -154,7 +154,69 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
         } catch (IOException e) {
             Log.e("AmbientFragment", "Error loading assets", e);
         }
+
+        // If ambient path preference set, add those files too
+        if (directoryUri == null) return audioFiles;
+
+        DocumentFile directory = DocumentFile.fromTreeUri(requireContext(), directoryUri);
+        if (directory == null) return audioFiles;
+
+        for (DocumentFile file : directory.listFiles()) {
+            String type = file.getType();
+
+            // Accept all audio file types
+            if (file.isFile() && type !=null && type.startsWith("audio/")) {
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                try {
+                    retriever.setDataSource(requireContext(), file.getUri());
+
+                    String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                    if (!isMetadata(title)) {
+                        title = file.getName(); // default
+                    }
+
+                    byte[] coverArt = retriever.getEmbeddedPicture();
+
+                    // Create audio file
+                    audioFiles.add(new AudioFile(
+                            title,
+                            "",
+                            "",
+                            0,
+                            file.getUri().toString(),
+                            coverArt,
+                            file.lastModified()
+                    ));
+                } catch (Exception e) {
+                    Log.e("AmbientFragment", "Error loading audio file:", e);
+
+                    // On exception, create placeholder audioFile
+                    audioFiles.add(new AudioFile(
+                            file.getName(),
+                            "",
+                            "",
+                            0,
+                            file.getUri().toString(),
+                            null,
+                            file.lastModified()
+                    ));
+                } finally {
+                    try {
+                        retriever.release();
+                    } catch (IOException e) {
+                        Log.e("AmbientFragment", "Error releasing retriever:", e);
+                    }
+
+                }
+            }
+        }
+
+
         return audioFiles;
+    }
+
+    private boolean isMetadata(String metadata) {
+        return metadata != null && !metadata.isEmpty();
     }
 
     /**
