@@ -19,7 +19,6 @@ import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -42,7 +41,7 @@ import com.example.audiomixer.fragments.HomeFragment;
 import com.example.audiomixer.fragments.QueueFragment;
 import com.example.audiomixer.fragments.SongFragment;
 import com.example.audiomixer.objects.AudioFile;
-import com.example.audiomixer.services.MusicPlaybackService;
+import com.example.audiomixer.services.PlaybackService;
 import com.example.audiomixer.utils.AppPreferences;
 import com.example.audiomixer.utils.TimeUtility;
 import com.google.android.material.card.MaterialCardView;
@@ -66,7 +65,7 @@ public class MainActivity extends AppCompatActivity
     private ImageView ambientPauseIcon;
     private Drawable thumb;
     private Drawable invisibleThumb;
-    private MusicPlaybackService playbackService;
+    private PlaybackService playbackService;
     private boolean serviceBound = false;
     private ImageButton songPauseButton;
     private TextView songTitle;
@@ -80,14 +79,14 @@ public class MainActivity extends AppCompatActivity
     private int colorPrimary;
     private int colorDefault;
 
-    public final MutableLiveData<MusicPlaybackService> serviceLiveData = new MutableLiveData<>();
+    public final MutableLiveData<PlaybackService> serviceLiveData = new MutableLiveData<>();
 
 
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicPlaybackService.LocalBinder binder = (MusicPlaybackService.LocalBinder) service;
+            PlaybackService.LocalBinder binder = (PlaybackService.LocalBinder) service;
             playbackService = binder.getService();
             serviceBound = true;
 
@@ -220,7 +219,7 @@ public class MainActivity extends AppCompatActivity
             return insets;
         });
 
-        Intent intent = new Intent(this, MusicPlaybackService.class);
+        Intent intent = new Intent(this, PlaybackService.class);
 
         // Use correct syntax for version >= Oreo
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -470,7 +469,7 @@ public class MainActivity extends AppCompatActivity
     public void onSongSelected(List<AudioFile> playlist, int position) {
         if (serviceBound) {
             playbackService.setPlaylist(playlist, position);
-            playbackService.play(position);
+            playbackService.play();
             openSongMiniplayer();
             pauseOrResume();
 
@@ -568,7 +567,7 @@ public class MainActivity extends AppCompatActivity
      * Expose playback service to fragments
      * @return the service
      */
-    public MusicPlaybackService getPlaybackService() {
+    public PlaybackService getPlaybackService() {
         if (serviceBound) {
             return playbackService;
         } else {

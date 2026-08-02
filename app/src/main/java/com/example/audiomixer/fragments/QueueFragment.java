@@ -1,7 +1,6 @@
 package com.example.audiomixer.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,20 +15,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.audiomixer.R;
 import com.example.audiomixer.adapters.SongAdapter;
 import com.example.audiomixer.objects.AudioFile;
-import com.example.audiomixer.services.MusicPlaybackService;
+import com.example.audiomixer.services.PlaybackService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class QueueFragment extends BottomSheetDialogFragment {
 
-    private final MusicPlaybackService playbackService;
+    private final PlaybackService playbackService;
     private SongAdapter songAdapter;
 
     // Vars used to track where user is dragging a song to be used when released.
     private int draggingFrom = -1;
     private int draggingTo = -1;
-    public QueueFragment(MusicPlaybackService service) {
+    public QueueFragment(PlaybackService service) {
         this.playbackService = service;
     }
 

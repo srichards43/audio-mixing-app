@@ -55,6 +55,7 @@
             android:layout_marginBottom="8dp"
             android:background="#00FFFFFF"
             android:src="@drawable/ascending_arrow"
+            android:contentDescription="@string/song_sort_direction_cd"
             app:layout_constraintBottom_toTopOf="@+id/songRecyclerView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -1,15 +1,11 @@
 package com.example.audiomixer.fragments;
 
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -19,7 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.activities.MainActivity;
-import com.example.audiomixer.services.MusicPlaybackService;
+import com.example.audiomixer.services.PlaybackService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
@@ -27,31 +23,27 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class SleepTimersFragment extends BottomSheetDialogFragment {
-    private MusicPlaybackService playbackService;
+    private PlaybackService playbackService;
 
     // Music UI
     private MaterialCardView musicTimerCard;
-    private ConstraintLayout musicTimerHeader;
     private SwitchCompat musicTimerSwitch;
-    private ConstraintLayout musicResetRow;
     private TextView musicTimerField;
     private View musicTimerPauseOverlay;
 
     // Ambience UI
     private MaterialCardView ambienceTimerCard;
-    private ConstraintLayout ambienceTimerHeader;
     private SwitchCompat ambienceTimerSwitch;
-    private ConstraintLayout ambienceResetRow;
     private TextView ambienceTimerField;
     private View ambienceTimerPauseOverlay;
 
     // Editor UI
     private Spinner timerSpinner;
     private TextView timerDurationField;
-    private ConstraintLayout fadeDurationRow;
     private TextView fadeDurationField;
     private ChipGroup presetChipGroup;
     private ConstraintLayout timerStartRow;
+    private ConstraintLayout timerStartError;
 
 
     private int timerDuration = 900000; // in ms, 15min default
@@ -64,11 +56,21 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
         View view = inflater.inflate(R.layout.fragment_sleep_timers, container, false);
 
         musicTimerCard = view.findViewById(R.id.musicTimerCard);
-        musicTimerHeader = view.findViewById(R.id.musicTimerHeader);
-        musicTimerSwitch = view.findViewById(R.id.musicTimerSwitch);
-        musicResetRow = view.findViewById(R.id.musicResetRow);
+        ConstraintLayout musicTimerHeader = musicTimerCard.findViewById(R.id.musicTimerHeader);
+        musicTimerSwitch = musicTimerCard.findViewById(R.id.musicTimerSwitch);
+        ConstraintLayout musicResetRow = musicTimerCard.findViewById(R.id.musicResetRow);
         musicTimerPauseOverlay = musicTimerCard.findViewById(R.id.musicTimerPauseOverlay);
         musicTimerField = musicTimerCard.findViewById(R.id.musicTimer);
+
+        ambienceTimerCard = view.findViewById(R.id.ambienceTimerCard);
+        ConstraintLayout ambienceTimerHeader = ambienceTimerCard.findViewById(R.id.ambienceTimerHeader);
+        ambienceTimerSwitch = ambienceTimerCard.findViewById(R.id.ambienceTimerSwitch);
+        ConstraintLayout ambienceResetRow = ambienceTimerCard.findViewById(R.id.ambienceResetRow);
+        ambienceTimerPauseOverlay = ambienceTimerCard.findViewById(R.id.ambienceTimerPauseOverlay);
+        ambienceTimerField = ambienceTimerCard.findViewById(R.id.ambienceTimer);
+
+        timerStartRow = view.findViewById(R.id.timerStartRow);
+        timerStartError = view.findViewById(R.id.timerStartError);
 
         musicResetRow.setOnClickListener(v -> { playbackService.resetMusicSleepTimer(); });
 
@@ -85,14 +87,6 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
             }
         });
 
-
-        ambienceTimerCard = view.findViewById(R.id.ambienceTimerCard);
-        ambienceTimerHeader = view.findViewById(R.id.ambienceTimerHeader);
-        ambienceTimerSwitch = view.findViewById(R.id.ambienceTimerSwitch);
-        ambienceResetRow = view.findViewById(R.id.ambienceResetRow);
-        ambienceTimerPauseOverlay = ambienceTimerCard.findViewById(R.id.ambienceTimerPauseOverlay);
-        ambienceTimerField = ambienceTimerCard.findViewById(R.id.ambienceTimer);
-
         ambienceResetRow.setOnClickListener(v -> { playbackService.resetAmbienceSleepTimer(); });
 
         ambienceTimerHeader.setOnClickListener(v -> ambienceTimerSwitch.toggle());
@@ -107,6 +101,8 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
                 playbackService.pauseAmbienceSleepTimer();
             }
         });
+
+
 
         // Preset chips
         presetChipGroup = view.findViewById(R.id.presetChipGroup);
@@ -126,7 +122,7 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
         timerDurationField = timerDurationRow.findViewById(R.id.timerDurationField);
         setTimerDuration(timerDuration);
 
-        fadeDurationRow = view.findViewById(R.id.fadeDurationRow);
+        ConstraintLayout fadeDurationRow = view.findViewById(R.id.fadeDurationRow);
         fadeDurationRow.setOnClickListener(v -> {
             showDurationPicker("Set Fade", fadeDuration, true);
         });
@@ -159,8 +155,9 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        timerStartRow = view.findViewById(R.id.timerStartRow);
         timerStartRow.setOnClickListener(v -> {
+            if (fadeDuration > timerDuration) return;
+
             int target = timerSpinner.getSelectedItemPosition();
             switch (target) {
                 case 0:
@@ -176,7 +173,6 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
             }
         });
 
-
         return view;
     }
 
@@ -188,10 +184,6 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
             this.playbackService = playbackService;
             syncUIWithService();
         });
-    }
-
-    public void startTimer() {
-
     }
 
     private void syncUIWithService() {
@@ -220,9 +212,9 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
                 ambienceTimerCard.setVisibility(View.VISIBLE);
                 if (remaining == 0) {
                     // Timer finished
-                    musicTimerField.setText(R.string.timer_finished);
+                    ambienceTimerField.setText(R.string.timer_finished);
                 } else {
-                    musicTimerField.setText(formatTime(remaining.intValue()));
+                    ambienceTimerField.setText(formatTime(remaining.intValue()));
                 }
 
                 ambienceTimerSwitch.setChecked(!playbackService.getAmbienceTimerPaused());
@@ -237,15 +229,27 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
         timerDuration = duration;
         timerDurationField.setText(formatTime(duration));
 
-        // Ensure fade duration not greater than timer duration
+        // Show error if duration less than fade
         if (timerDuration < fadeDuration) {
-            fadeDuration = timerDuration;
+            timerStartRow.setVisibility(View.GONE);
+            timerStartError.setVisibility(View.VISIBLE);
+        } else {
+            timerStartRow.setVisibility(View.VISIBLE);
+            timerStartError.setVisibility(View.GONE);
         }
     }
 
     private void setFadeDuration(int duration) {
         fadeDuration = duration;
         fadeDurationField.setText(formatTime(duration));
+
+        if (timerDuration < fadeDuration) {
+            timerStartRow.setVisibility(View.GONE);
+            timerStartError.setVisibility(View.VISIBLE);
+        } else {
+            timerStartRow.setVisibility(View.VISIBLE);
+            timerStartError.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -319,25 +323,5 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
         }
 
         return duration;
-    }
-
-    private void showFadeDurationRow() {
-        fadeDurationRow.setAlpha(0f);
-        fadeDurationRow.setVisibility(View.VISIBLE);
-        fadeDurationRow.animate()
-                .alpha(1f)
-                .setDuration(200)
-                .start();
-    }
-
-    private void hideFadeDurationRow() {
-        fadeDurationRow.animate()
-                .alpha(0f)
-                .setDuration(200)
-                .withEndAction(() -> {
-                    fadeDurationRow.setVisibility(View.GONE);
-                    fadeDurationRow.setAlpha(1f);
-                })
-                .start();
     }
 }

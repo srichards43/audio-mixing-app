@@ -135,8 +135,8 @@ public class AmbientAdapter extends RecyclerView.Adapter<AmbientAdapter.AmbientV
     }
 
     static class AmbientViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        ImageView cover;
+        final TextView title;
+        final ImageView cover;
 
         public AmbientViewHolder(@NonNull View itemView) {
             super(itemView);

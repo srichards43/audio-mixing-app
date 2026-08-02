@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +18,6 @@ import android.widget.TextView;
 import com.example.audiomixer.R;
 import com.example.audiomixer.activities.MainActivity;
 import com.example.audiomixer.activities.SettingsActivity;
-import com.example.audiomixer.objects.AudioFile;
-import com.example.audiomixer.services.MusicPlaybackService;
-
-import java.util.List;
 
 import me.tankery.lib.circularseekbar.CircularSeekBar;
 

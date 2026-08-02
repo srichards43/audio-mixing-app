@@ -21,6 +21,7 @@
                 android:id="@+id/imageView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/drag_handle_cd"
                 app:tint="@color/text"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -35,6 +36,16 @@
             android:layout_height="35dp"
             android:backgroundTint="@color/secondaryMenuBar">
 
+            <View
+                android:id="@+id/divider16"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@drawable/shape_gradient_div"
+                android:backgroundTint="#ffffff"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
@@ -43,7 +54,6 @@
                 android:text="@string/queue_header"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/div"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,22 +63,13 @@
                 android:layout_height="30dp"
                 android:layout_marginEnd="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/drag_handle_cd"
                 android:scaleType="fitCenter"
-                app:tint="@color/secondaryText"
-                app:layout_constraintBottom_toTopOf="@+id/div"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_shuffle" />
+                app:srcCompat="@drawable/ic_shuffle"
+                app:tint="@color/secondaryText" />
 
-            <ImageView
-                android:id="@+id/div"
-                android:layout_width="0dp"
-                android:layout_height="3dp"
-                android:backgroundTint="?attr/colorSurface"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:srcCompat="@drawable/shape_gradient_div" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView

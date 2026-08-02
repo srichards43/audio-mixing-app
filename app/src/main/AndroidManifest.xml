@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioMixer">
         <service
-            android:name=".services.MusicPlaybackService"
+            android:name=".services.PlaybackService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"></service>

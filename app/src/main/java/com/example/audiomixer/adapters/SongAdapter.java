@@ -197,6 +197,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         switch (category) {
             case "Added" :
                 filteredSongs.sort((o1, o2) -> Long.compare(o1.getCreatedAt(), o2.getCreatedAt()));
+                break;
             case "Title" :
                 filteredSongs.sort((o1, o2) -> o1.getTitle().compareToIgnoreCase(o2.getTitle()));
                 break;
@@ -222,9 +223,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
 
     static class SongViewHolder extends RecyclerView.ViewHolder {
-        TextView title, songInfo, duration;
-        ImageView albumCover;
-        ImageButton playButton;
+        final TextView title, songInfo, duration;
+        final ImageView albumCover;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);

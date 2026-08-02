@@ -53,6 +53,7 @@
 
     <!--Queue fragment strings-->
     <string name="queue_header">Up Next</string>
+    <string name="shuffle_button">Shuffle</string>
 
     <!--Sleep timer fragment strings-->
     <string name="sleep_timer_header">Sleep Timers</string>
@@ -69,6 +70,7 @@
     <string name="fade_duration_label">Fade Duration:</string>
 
     <string name="timer_finished">Finished</string>
+    <string name="start_error">Fade duration must not exceed timer duration.</string>"
 
     <!--Sleep timer chip presets-->
     <string name="chip_15">15</string>
@@ -89,5 +91,13 @@
     <string name="hour_picker">Hours</string>
     <string name="minute_picker">Minutes</string>
     <string name="second_picker">Seconds</string>
+
+    <!--Accessibility (cd - content desc) -->
+    <string name="album_cover_cd">Album cover</string>
+    <string name="song_sort_direction_cd">Direction of sorted list</string>
+    <string name="ambient_disk_cover_cd">Ambient disk cover</string>
+    <string name="ambient_disk_hole_cd">Ambient disk hole</string>
+    <string name="ambient_pause_cd">Ambient disk paused</string>
+    <string name="drag_handle_cd">Drag Handle</string>
 
 </resources>

@@ -24,6 +24,7 @@
             android:id="@+id/ambientCover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/ambient_disk_cover_cd"
             android:scaleType="centerCrop"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
@@ -35,6 +36,7 @@
                 android:id="@+id/discHole"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
+                android:contentDescription="@string/ambient_disk_hole_cd"
                 app:tint="@color/background"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -48,6 +50,7 @@
                 android:layout_height="wrap_content"
                 app:tint="@color/primary"
                 android:visibility="invisible"
+                android:contentDescription="@string/ambient_pause_cd"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -243,6 +246,7 @@
                     android:layout_height="50dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
+                    android:contentDescription="@string/album_cover_cd"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"

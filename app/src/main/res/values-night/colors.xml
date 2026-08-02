@@ -7,4 +7,6 @@
     <color name="secondaryMenuBar">#242424</color>
     <color name="primary">#FF2600</color>
     <color name="secondary">#B42700</color>
+    <color name="positive">#56D63F</color>
+    <color name="negative">#DD2B2B</color>
 </resources>

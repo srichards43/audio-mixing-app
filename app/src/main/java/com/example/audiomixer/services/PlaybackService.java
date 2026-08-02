@@ -16,6 +16,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 
+import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MusicPlaybackService extends Service {
+public class PlaybackService extends Service {
     private ExoPlayer player;
     private ExoPlayer ambiencePlayer; // Low maintenance player for ambient sounds
     private MediaSessionCompat mediaSession;
@@ -111,8 +112,8 @@ public class MusicPlaybackService extends Service {
     };
 
     public class LocalBinder extends Binder {
-        public MusicPlaybackService getService() {
-            return MusicPlaybackService.this;
+        public PlaybackService getService() {
+            return PlaybackService.this;
         }
     }
 
@@ -211,7 +212,7 @@ public class MusicPlaybackService extends Service {
         stopSelf();
     }
 
-    public MusicPlaybackService() {
+    public PlaybackService() {
     }
 
     @Override
@@ -241,7 +242,7 @@ public class MusicPlaybackService extends Service {
     }
 
     // Play song from audioFile
-    public void play(int position) {
+    public void play() {
         player.play();
     }
 
@@ -496,12 +497,6 @@ public class MusicPlaybackService extends Service {
         }
     }
 
-    public void cancelMusicSleepTimer() {
-        timerHandler.removeCallbacks(musicTimerRunnable);
-        musicTimerRemaining.postValue(null);
-        player.setVolume(musicBaseVolume); // Snap volume back
-    }
-
     public void resetMusicSleepTimer() {
         startMusicSleepTimer(musicInitialDuration, musicFadeDuration);
     }
@@ -548,12 +543,6 @@ public class MusicPlaybackService extends Service {
         }
     }
 
-    public void cancelAmbienceSleepTimer() {
-        timerHandler.removeCallbacks(ambienceTimerRunnable);
-        ambienceTimerRemaining.postValue(null);
-        ambiencePlayer.setVolume(ambienceBaseVolume); // Snap volume back
-    }
-
     public void resetAmbienceSleepTimer() {
         startAmbienceSleepTimer(ambienceInitialDuration, ambienceFadeDuration);
     }
@@ -573,5 +562,10 @@ public class MusicPlaybackService extends Service {
         player.release();
         ambiencePlayer.release();
         mediaSession.release();
+    }
+
+    @VisibleForTesting
+    public void setPlayer(ExoPlayer player) {
+        this.player = player;
     }
 }

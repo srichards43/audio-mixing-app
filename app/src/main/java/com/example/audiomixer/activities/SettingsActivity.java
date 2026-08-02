@@ -29,11 +29,6 @@ public class SettingsActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> songDirectoryPickLauncher;
     private ActivityResultLauncher<Intent> ambientDirectoryPickLauncher;
 
-    private ConstraintLayout themeRow;
-    private ConstraintLayout launchTabRow;
-    private ConstraintLayout ambientDiskRotationRow;
-    private ConstraintLayout songPathRow;
-    private ConstraintLayout ambientPathRow;
     private Spinner themeSpinner;
     private Spinner launchTabSpinner;
     private SwitchCompat ambientDiskRotationSwitch;
@@ -56,7 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        themeRow = this.findViewById(R.id.themeRow);
+        ConstraintLayout themeRow = this.findViewById(R.id.themeRow);
         themeSpinner = this.findViewById(R.id.themeSpinner);
 
         // Load theme selection spinner
@@ -87,7 +82,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-        launchTabRow = this.findViewById(R.id.launchTabRow);
+        ConstraintLayout launchTabRow = this.findViewById(R.id.launchTabRow);
         launchTabSpinner = this.findViewById(R.id.launchTabSpinner);
 
         // Load launch tab selection spinner
@@ -115,7 +110,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-        songPathRow = this.findViewById(R.id.songPathRow);
+        ConstraintLayout songPathRow = this.findViewById(R.id.songPathRow);
         songPathButton = this.findViewById(R.id.songPathButton);
         // Load path button text
         Uri savedUri = AppPreferences.getMusicDirectoryUri(this);
@@ -148,7 +143,7 @@ public class SettingsActivity extends AppCompatActivity {
             songDirectoryPickLauncher.launch(intent);
         });
 
-        ambientPathRow = this.findViewById(R.id.ambientPathRow);
+        ConstraintLayout ambientPathRow = this.findViewById(R.id.ambientPathRow);
         ambientPathButton = this.findViewById(R.id.ambientPathButton);
         // Load path button text
         Uri savedAmbientUri = AppPreferences.getAmbientDirectoryUri(this);
@@ -182,7 +177,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-        ambientDiskRotationRow = this.findViewById(R.id.ambientDiskRotationRow);
+        ConstraintLayout ambientDiskRotationRow = this.findViewById(R.id.ambientDiskRotationRow);
         ambientDiskRotationSwitch = this.findViewById(R.id.ambientDiskRotationSwitch);
 
         ambientDiskRotationRow.setOnClickListener(v -> {
