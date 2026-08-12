@@ -8,9 +8,17 @@
         <item name="android:textColorSecondary">@color/secondaryText</item>
         <item name="colorSurface">@color/menuBar</item>
         <item name="colorSurfaceVariant">@color/secondaryMenuBar</item>
+    </style>
+
+    <style name="Theme.AudioMixer.Red" parent="Base.Theme.AudioMixer">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSecondary">@color/secondary</item>
     </style>
 
-    <style name="Theme.AudioMixer" parent="Base.Theme.AudioMixer" />
+    <style name="Theme.AudioMixer.Blue" parent="Base.Theme.AudioMixer">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorSecondary">@color/secondary_blue</item>
+    </style>
+
+    <style name="Theme.AudioMixer" parent="Theme.AudioMixer.Red" />
 </resources>

@@ -12,4 +12,24 @@
     <color name="positive">#358327</color>
     <color name="negative">#941E1E</color>
     <color name="disabled">#797F7F7F</color>
+
+    <color name="primary_red">#FF0000</color>
+    <color name="secondary_red">#FF0000</color>
+
+    <color name="primary_green">#00FF00</color>
+    <color name="secondary_green">#00FF00</color>
+
+    <color name="primary_blue">#0000FF</color>
+    <color name="secondary_blue">#0000FF</color>
+
+    <color name="primary_yellow">#FFFF00</color>
+    <color name="secondary_yellow">#FFFF00</color>
+
+    <color name="primary_purple">#FF00FF</color>
+    <color name="secondary_purple">#FF00FF</color>
+
+    <color name="primary_orange">#FFA500</color>
+    <color name="secondary_orange">#FFA500</color>
+
+
 </resources>
