@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity
     private int colorPrimary;
     private int colorDefault;
 
-    public final MutableLiveData<PlaybackService> serviceLiveData = new MutableLiveData<>();
+    public final MutableLiveData<PlaybackService> serviceLiveData = new MutableLiveData<>(); // for fragments to observe
 
 
 
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity
                 songCurrentTimeText.setText(TimeUtility.getFormattedDuration(pos));
             });
 
-            // Observe when song changes, call updateSongDetails()
+            // Observe when song changes
             playbackService.getCurrentSongInternal().observe(MainActivity.this, song -> {
                 if (song != null) {
                     updateSongDetails();
@@ -106,8 +106,52 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
+            // Observe song pause state
+            playbackService.getIsPlaying().observe(MainActivity.this, isPlaying -> {
+                if (isPlaying) {
+                    songPauseButton.setImageResource(R.drawable.ic_pause);
+                } else {
+                    songPauseButton.setImageResource(R.drawable.ic_play);
+                }
+            });
+
+            // Observe ambient pause state
+            playbackService.getIsAmbientPlaying().observe(MainActivity.this, isPlaying -> {
+                if (isPlaying) {
+                    ambientPauseIcon.setVisibility(View.GONE);
+                    spinAmbientDisc();
+                } else {
+                    ambientPauseIcon.setVisibility(View.VISIBLE);
+                    ambientCoverImg.animate().cancel();
+                }
+            });
+
+            // Observe when ambience changes
+            playbackService.getCurrentAmbientInternal().observe(MainActivity.this, ambient -> {
+                if (ambient == null) {
+                    ambientDisc.setVisibility(View.GONE);
+                    isAmbientButtonOpen = false;
+                } else {
+                    openAmbientDisc();
+                    if (ambient.getAlbumCover() != null) {
+                        Bitmap bmp = BitmapFactory.decodeByteArray(ambient.getAlbumCover(), 0, ambient.getAlbumCover().length);
+                        ambientCoverImg.setImageBitmap(bmp);
+                    } else {
+                        ambientCoverImg.setImageResource(R.drawable.shape_circle);
+                    }
+                }
+            });
+
+            // Initial Sync for Repeat Mode (only needs to run once)
+            int repeatMode = playbackService.getRepeatMode();
+            switch (repeatMode) {
+                case 1: loopState = 2; break;
+                case 2: loopState = 1; break;
+                default: loopState = 0;
+            }
+            updateLoopUI();
+
             serviceLiveData.setValue(playbackService);
-            SyncUIWithService();
         }
 
         @Override
@@ -115,55 +159,6 @@ public class MainActivity extends AppCompatActivity
             serviceBound = false;
         }
     };
-
-    private void SyncUIWithService() {
-        if (playbackService == null) return;
-
-        if (playbackService.isPlaying()) {
-            songPauseButton.setImageResource(R.drawable.ic_pause);
-        } else {
-            songPauseButton.setImageResource(R.drawable.ic_play);
-        }
-
-        int repeatMode = playbackService.getRepeatMode();
-
-        // Map playback vals to activity vals
-        switch (repeatMode) {
-            case 1:
-                loopState =2;
-                break;
-            case 2:
-                loopState = 1;
-                break;
-            default: loopState = 0;
-        }
-
-        updateLoopUI();
-
-        AudioFile currentSong = playbackService.getCurrentSong();
-        if (currentSong != null) {
-            openSongMiniplayer();
-        }
-
-        AudioFile currentAmbient = playbackService.getCurrentAmbientInternal().getValue();
-        if (currentAmbient != null)
-        {
-            openAmbientDisc();
-            if (playbackService.isAmbientPlaying())
-            {
-                spinAmbientDisc();
-            } else {
-                ambientPauseIcon.setVisibility(View.VISIBLE);
-            }
-
-            if (currentAmbient.getAlbumCover() != null) {
-                Bitmap bmp = BitmapFactory.decodeByteArray(currentAmbient.getAlbumCover(), 0, currentAmbient.getAlbumCover().length);
-                ambientCoverImg.setImageBitmap(bmp);
-            } else {
-                ambientCoverImg.setImageResource(R.drawable.shape_circle);
-            }
-        }
-    }
 
     @Override
     public void onStop() {

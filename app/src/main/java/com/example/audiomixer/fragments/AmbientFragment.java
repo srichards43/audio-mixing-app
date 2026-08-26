@@ -102,8 +102,12 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
         // Observe once service is live
         ((MainActivity)requireActivity()).serviceLiveData.observe(getViewLifecycleOwner(), service -> {
             service.getCurrentAmbientInternal().observe(getViewLifecycleOwner(), ambience -> {
-                if (ambience != null && ambientAdapter != null) {
-                    ambientAdapter.setCurrentlyPlaying(ambience.getFilePath());
+                if (ambientAdapter != null) {
+                    if (ambience == null) {
+                        ambientAdapter.setCurrentlyPlaying(null);
+                    } else {
+                        ambientAdapter.setCurrentlyPlaying(ambience.getFilePath());
+                    }
                 }
             });
         });

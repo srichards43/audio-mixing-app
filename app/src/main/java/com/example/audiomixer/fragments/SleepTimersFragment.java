@@ -72,7 +72,10 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
         timerStartRow = view.findViewById(R.id.timerStartRow);
         timerStartError = view.findViewById(R.id.timerStartError);
 
-        musicResetRow.setOnClickListener(v -> { playbackService.resetMusicSleepTimer(); });
+        musicResetRow.setOnClickListener(v -> {
+            playbackService.resetMusicSleepTimer();
+            musicTimerSwitch.setChecked(true);
+        });
 
         musicTimerHeader.setOnClickListener(v -> musicTimerSwitch.toggle());
 
@@ -87,7 +90,10 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
             }
         });
 
-        ambienceResetRow.setOnClickListener(v -> { playbackService.resetAmbienceSleepTimer(); });
+        ambienceResetRow.setOnClickListener(v -> {
+            playbackService.resetAmbienceSleepTimer();
+            ambienceTimerSwitch.setChecked(true);
+        });
 
         ambienceTimerHeader.setOnClickListener(v -> ambienceTimerSwitch.toggle());
 
@@ -162,13 +168,17 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
             switch (target) {
                 case 0:
                     playbackService.startMusicSleepTimer(timerDuration, fadeDuration);
+                    musicTimerSwitch.setChecked(true);
                     break;
                 case 1:
                     playbackService.startAmbienceSleepTimer(timerDuration, fadeDuration);
+                    ambienceTimerSwitch.setChecked(true);
                     break;
                 case 2:
                     playbackService.startMusicSleepTimer(timerDuration, fadeDuration);
+                    musicTimerSwitch.setChecked(true);
                     playbackService.startAmbienceSleepTimer(timerDuration, fadeDuration);
+                    ambienceTimerSwitch.setChecked(true);
                     break;
             }
         });

@@ -187,6 +187,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
         notifyItemMoved(from, to);
     }
 
+    public void deleteItem(int position) {
+        if (position >= 0 && position < filteredSongs.size()) {
+            filteredSongs.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
     /**
      * Sort songs based on a category selected in the spinner, separated from filterSongs to avoid
      * unnecessary overhead for spinner select/direction button click

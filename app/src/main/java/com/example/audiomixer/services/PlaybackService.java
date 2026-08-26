@@ -351,9 +351,14 @@ public class PlaybackService extends Service {
     public List<AudioFile> getPlaylist() { return playlist; }
     public void setPlaylist(List<AudioFile> newPlaylist, int startIndex) {
         if (musicMediaSession != null) musicMediaSession.setActive(true);
-        playlist.clear(); playlist.addAll(newPlaylist);
+
+        playlist.clear();
+        playlist.addAll(newPlaylist);
+
         List<MediaItem> mediaItems = new ArrayList<>();
-        for (AudioFile song : playlist) mediaItems.add(MediaItem.fromUri(song.getFilePath()));
+        for (AudioFile song : playlist) {
+            mediaItems.add(MediaItem.fromUri(song.getFilePath()));
+        }
         player.setMediaItems(mediaItems, startIndex, 0); player.prepare();
         updateMusicNotification();
     }
@@ -362,22 +367,58 @@ public class PlaybackService extends Service {
         if (current == -1 || playlist.isEmpty()) return new ArrayList<>();
         return new ArrayList<>(playlist.subList(current, playlist.size()));
     }
+
+    // Split playlist around current playing and shuffle each side.
     public void shufflePlaylist() {
         if (playlist.size() < 2) return;
         int currentIndex = player.getCurrentMediaItemIndex();
-        if (currentIndex > 0) Collections.shuffle(playlist.subList(0, currentIndex));
-        if (currentIndex < playlist.size() - 1) Collections.shuffle(playlist.subList(currentIndex + 1, playlist.size()));
-        List<MediaItem> prev = new ArrayList<>(), next = new ArrayList<>();
-        for (int i = 0; i < currentIndex; i++) prev.add(MediaItem.fromUri(playlist.get(i).getFilePath()));
-        for (int i = currentIndex + 1; i < playlist.size(); i++) next.add(MediaItem.fromUri(playlist.get(i).getFilePath()));
-        if (!prev.isEmpty()) { player.removeMediaItems(0, currentIndex); player.addMediaItems(0, prev); }
-        if (!next.isEmpty()) { player.removeMediaItems(currentIndex + 1, player.getMediaItemCount()); player.addMediaItems(currentIndex + 1, next); }
+
+        // Shuffle sublists
+        if (currentIndex > 0) {
+            Collections.shuffle(playlist.subList(0, currentIndex));
+        }
+        if (currentIndex < playlist.size() - 1) {
+            Collections.shuffle(playlist.subList(currentIndex + 1, playlist.size()));
+        }
+
+        // Convert both sides to media items
+        List<MediaItem> before = new ArrayList<>();
+        List<MediaItem> after = new ArrayList<>();
+        for (int i = 0; i < currentIndex; i++) {
+            before.add(MediaItem.fromUri(playlist.get(i).getFilePath()));
+        }
+        for (int i = currentIndex + 1; i < playlist.size(); i++) {
+            after.add(MediaItem.fromUri(playlist.get(i).getFilePath()));
+        }
+
+        if (!before.isEmpty()) {
+            player.removeMediaItems(0, currentIndex);
+            player.addMediaItems(0, before);
+        }
+        if (!after.isEmpty()) {
+            player.removeMediaItems(currentIndex + 1, player.getMediaItemCount());
+            player.addMediaItems(currentIndex + 1, after);
+        }
+
     }
+
     public void moveItemInQueue(int from, int to) {
-        if (from >= 0 && from < playlist.size() && to >= 0 && to < playlist.size()) {
-            AudioFile item = playlist.remove(from); playlist.add(to, item); player.moveMediaItem(from, to);
+        if (from >= 0 && from < playlist.size()) {
+            if (to >= 0 && to < playlist.size()) {
+                AudioFile item = playlist.remove(from);
+                playlist.add(to, item);
+                player.moveMediaItem(from, to);
+            }
         }
     }
+
+    public void deleteItemInQueue(int index) {
+        if (index >= 0 && index < playlist.size()) {
+            playlist.remove(index);
+            player.removeMediaItem(index);
+        }
+    }
+
     public LiveData<AudioFile> getCurrentSongInternal() { return currentSongInternal; }
     public LiveData<Boolean> getIsPlaying() { return isPlayingInternal; }
     public int getCurrentIndex() { return player.getCurrentMediaItemIndex(); }

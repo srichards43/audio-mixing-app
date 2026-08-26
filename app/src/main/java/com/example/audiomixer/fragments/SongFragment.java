@@ -165,8 +165,13 @@ public class SongFragment extends Fragment implements SongAdapter.OnSongClickLis
         // Observe when service is live.
         ((MainActivity)requireActivity()).serviceLiveData.observe(getViewLifecycleOwner(), service -> {
             service.getCurrentSongInternal().observe(getViewLifecycleOwner(), song -> {
-                if (song != null && songAdapter != null) {
-                    songAdapter.setCurrentlyPlaying(song.getFilePath());
+                if (songAdapter != null) {
+                    if (song == null) {
+                        songAdapter.setCurrentlyPlaying(null);
+                    } else {
+                        songAdapter.setCurrentlyPlaying(song.getFilePath());
+                    }
+
                 }
             });
         });

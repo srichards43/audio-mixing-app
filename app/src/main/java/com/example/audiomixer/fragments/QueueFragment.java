@@ -1,5 +1,7 @@
 package com.example.audiomixer.fragments;
 
+import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +59,7 @@ public class QueueFragment extends BottomSheetDialogFragment {
         recyclerView.setAdapter(songAdapter);
 
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(
-                ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
+                ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             // Track dragged song position and update UI
             @Override
@@ -103,10 +105,38 @@ public class QueueFragment extends BottomSheetDialogFragment {
                 draggingFrom = -1;
                 draggingTo = -1;
             }
-            // todo: delete from queue
+
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getBindingAdapterPosition();
+                int index = position + playbackService.getCurrentIndex(); // get actual index
 
+                playbackService.deleteItemInQueue(index);
+
+                songAdapter.deleteItem(position);
+            }
+
+            // Show red background on swipe
+            @Override
+            public void onChildDraw(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView,
+                                    @NonNull RecyclerView.ViewHolder viewHolder,
+                                    float shiftX, float shiftY, int actionState, boolean isCurrentlyActive) {
+
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    View view = viewHolder.itemView;
+
+                    // Fade bg alpha from 1 to 0 based on progress
+                    ColorDrawable bg = new ColorDrawable(view.getContext().getColor(R.color.negative));
+                    float alpha = 1 - (Math.abs(shiftX) / view.getWidth());
+                    bg.setAlpha((int) (alpha * 255));
+
+                    // Set bounds and draw
+                    bg.setBounds(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
+                    bg.draw(canvas);
+                }
+
+                // Always call super to make sure the item actually moves!
+                super.onChildDraw(canvas, recyclerView, viewHolder, shiftX, shiftY, actionState, isCurrentlyActive);
             }
         };
 
