@@ -10,6 +10,8 @@ public class TimeUtility {
      * @return formatted time
      */
     public static String getFormattedDuration(long duration) {
+        if (duration <= 0) return "0:00";
+
         long minutes = duration / 60000;
         long seconds = (duration % 60000) / 1000;
         return String.format(Locale.UK, "%d:%02d", minutes, seconds);

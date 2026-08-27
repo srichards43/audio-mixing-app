@@ -6,9 +6,12 @@ import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.example.audiomixer.R;
+
 public class AppPreferences {
     private static final String PREFS_NAME = "AudioMixerPrefs";
     private static final String THEME_INDEX_KEY = "theme_index";
+    private static final String COLOR_INDEX_KEY = "color_index";
     private static final String LAUNCH_TAB_KEY = "launch_tab";
     private static final String MUSIC_DIRECTORY_URI_KEY = "music_directory_uri";
     private static final String AMBIENT_DIRECTORY_URI_KEY = "ambient_directory_uri";
@@ -22,6 +25,59 @@ public class AppPreferences {
     public static void setThemeIndex(Context context, int index) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putInt(THEME_INDEX_KEY, index).apply();
+    }
+
+    /**
+     * Apply light/dark mode to app based on preferred theme index
+     * @param context context of activity to be applied
+     */
+    public static void applyTheme(Context context) {
+        int index = getThemeIndex(context);
+        switch (index) {
+            case 0:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+            case 1:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case 2:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
+        }
+    }
+
+    public static int getColorIndex(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getInt(COLOR_INDEX_KEY, 0);
+    }
+
+    public static void setColorIndex(Context context, int index) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(COLOR_INDEX_KEY, index).apply();
+    }
+
+    public static void applyColor(Context context) {
+        int index = getColorIndex(context);
+        switch (index) {
+            case 0:
+                context.setTheme(R.style.Theme_AudioMixer_Default);
+                break;
+            case 1:
+                context.setTheme(R.style.Theme_AudioMixer_Blue);
+                break;
+            case 2:
+                context.setTheme(R.style.Theme_AudioMixer_Green);
+                break;
+            case 3:
+                context.setTheme(R.style.Theme_AudioMixer_Orange);
+                break;
+            case 4:
+                context.setTheme(R.style.Theme_AudioMixer_Purple);
+                break;
+            case 5:
+                context.setTheme(R.style.Theme_AudioMixer_Pink);
+                break;
+        }
     }
 
     public static int getLaunchTab(Context context) {
@@ -43,25 +99,6 @@ public class AppPreferences {
     public static boolean getAmbientDiscRotation(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return prefs.getBoolean(AMBIENT_DISC_ROTATION_KEY, true);
-    }
-
-    /**
-     * Apply light/dark mode to app based on preferred theme index
-     * @param context context of activity to be applied
-     */
-    public static void applyTheme(Context context) {
-        int index = getThemeIndex(context);
-        switch (index) {
-            case 0:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                break;
-            case 1:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                break;
-            case 2:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                break;
-        }
     }
 
     public static void setMusicDirectoryUri(Context context, Uri uri) {

@@ -10,7 +10,7 @@
         <item name="colorSurfaceVariant">@color/secondaryMenuBar</item>
     </style>
 
-    <style name="Theme.AudioMixer.Red" parent="Base.Theme.AudioMixer">
+    <style name="Theme.AudioMixer.Default" parent="Base.Theme.AudioMixer">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSecondary">@color/secondary</item>
     </style>
@@ -20,5 +20,27 @@
         <item name="colorSecondary">@color/secondary_blue</item>
     </style>
 
-    <style name="Theme.AudioMixer" parent="Theme.AudioMixer.Red" />
+    <style name="Theme.AudioMixer.Green" parent="Base.Theme.AudioMixer">
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorSecondary">@color/secondary_green</item>
+    </style>
+
+    <style name="Theme.AudioMixer.Orange" parent="Base.Theme.AudioMixer">
+        <item name="colorPrimary">@color/primary_orange</item>
+        <item name="colorSecondary">@color/secondary_orange</item>
+    </style>
+
+
+    <style name="Theme.AudioMixer.Purple" parent="Base.Theme.AudioMixer">
+        <item name="colorPrimary">@color/primary_purple</item>
+        <item name="colorSecondary">@color/secondary_purple</item>
+    </style>
+
+    <style name="Theme.AudioMixer.Pink" parent="Base.Theme.AudioMixer">
+        <item name="colorPrimary">@color/primary_pink</item>
+        <item name="colorSecondary">@color/secondary_pink</item>
+    </style>
+
+
+    <style name="Theme.AudioMixer" parent="Theme.AudioMixer.Default" />
 </resources>

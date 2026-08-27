@@ -20,11 +20,14 @@
         <item>Light mode</item>
         <item>Dark mode</item>
     </string-array>
+    <string name="settings_color">Select accent color:</string>
     <string-array name="color_options">
-        <item>Blood Orange (Default)</item>
+        <item>Default</item>
         <item>Blue</item>
         <item>Green</item>
-        <item>Yellow</item>
+        <item>Orange</item>
+        <item>Purple</item>
+        <item>Pink</item>
     </string-array>
     <string-array name="launch_options">
         <item>Music</item>

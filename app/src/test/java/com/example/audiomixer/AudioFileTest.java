@@ -39,5 +39,4 @@ public class AudioFileTest {
         AudioFile file = new AudioFile("Title", "Artist", "Album", 61000, "path", null, 0);
         assertEquals("1:01", file.getFormattedDuration());
     }
-
 }

@@ -3,7 +3,9 @@ package com.example.audiomixer;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +34,11 @@ public class PlaybackServiceTest {
 
     @Before
     public void setup() {
-        service = new PlaybackService();
+        // Create service as spy and block notification update actions
+        service = spy(new PlaybackService());
+        doNothing().when(service).updateMusicNotification();
+        doNothing().when(service).updateAmbientNotification();
+
         mockPlayer = mock(ExoPlayer.class);
         service.setPlayer(mockPlayer);
 
@@ -42,7 +48,7 @@ public class PlaybackServiceTest {
         songs.add(new AudioFile("Song B", "Artist", "Album", 0, "pathB", null, 2000));
         songs.add(new AudioFile("Song C", "Artist", "Album", 0, "pathC", null, 3000));
 
-        service.setPlaylist(songs);
+        service.setPlaylist(songs, 0);
     }
 
 
@@ -80,10 +86,31 @@ public class PlaybackServiceTest {
 
     @Test
     public void setLoop_mapToExoPlayerModes() {
-        service.setLoop(1);
+        service.setLoop(2);
         verify(mockPlayer).setRepeatMode(ExoPlayer.REPEAT_MODE_ONE);
 
-        service.setLoop(2);
+        service.setLoop(1);
         verify(mockPlayer).setRepeatMode(ExoPlayer.REPEAT_MODE_ALL);
+    }
+
+    @Test
+    public void testDeleteCurrentlyPlaying_UpdatesState() {
+        service.deleteItemInQueue(0);
+
+        assertEquals(2, service.getPlaylist().size());
+        assertEquals("Song B", service.getPlaylist().get(0).getTitle());
+
+        verify(mockPlayer).removeMediaItem(0);
+    }
+
+    @Test
+    public void testDeleteNextThenSkip_MoveToThird() {
+        service.deleteItemInQueue(1);
+        service.skipToNext();
+
+        assertEquals(2, service.getPlaylist().size());
+        assertEquals("Song C", service.getPlaylist().get(1).getTitle());
+
+        verify(mockPlayer).removeMediaItem(1);
     }
 }

@@ -289,7 +289,8 @@ public class PlaybackService extends Service {
         ambienceMediaSession.setPlaybackState(builder.build());
     }
 
-    private void updateMusicNotification() {
+    @VisibleForTesting
+    public void updateMusicNotification() {
         AudioFile song = getCurrentSong();
         if (song == null) return;
         
@@ -310,7 +311,8 @@ public class PlaybackService extends Service {
         startForeground(NOTIFICATION_ID_MUSIC, builder.build());
     }
 
-    private void updateAmbientNotification() {
+    @VisibleForTesting
+    public void updateAmbientNotification() {
         AudioFile ambient = currentAmbientInternal.getValue();
         if (ambient == null) return;
 
@@ -420,42 +422,102 @@ public class PlaybackService extends Service {
     }
 
     public LiveData<AudioFile> getCurrentSongInternal() { return currentSongInternal; }
+
     public LiveData<Boolean> getIsPlaying() { return isPlayingInternal; }
+
     public int getCurrentIndex() { return player.getCurrentMediaItemIndex(); }
+
     public int getRepeatMode() { return player.getRepeatMode(); }
+
     private void onSongChanged(AudioFile newSong) { currentSongInternal.postValue(newSong); updateMusicNotification(); }
+
     public void playAmbient(AudioFile ambient) {
         if (ambienceMediaSession != null) ambienceMediaSession.setActive(true);
+
         ambiencePlayer.setMediaItem(MediaItem.fromUri(ambient.getFilePath()));
-        ambiencePlayer.prepare(); ambiencePlayer.play(); currentAmbientInternal.postValue(ambient);
+        ambiencePlayer.prepare();
+        ambiencePlayer.play();
+        currentAmbientInternal.postValue(ambient);
         updateAmbientNotification();
     }
+
     public void pauseAmbient() { ambiencePlayer.pause(); }
+
     public void resumeAmbient() { ambiencePlayer.play(); }
+
     public boolean isAmbientPlaying() { return ambiencePlayer.isPlaying(); }
+
     public void setAmbientVolume(float volume) { ambiencePlayer.setVolume(volume); }
+
     public float getAmbientVolume() { return ambiencePlayer.getVolume(); }
+
     public LiveData<AudioFile> getCurrentAmbientInternal() { return currentAmbientInternal; }
+
     public LiveData<Boolean> getIsAmbientPlaying() { return isAmbientPlayingInternal; }
-    public void startMusicSleepTimer(long d, long f) {
-        timerHandler.removeCallbacks(musicTimerRunnable); musicBaseVolume = player.getVolume();
-        musicInitialDuration = d; musicEndTime = SystemClock.elapsedRealtime() + d; musicFadeDuration = f;
-        musicTimerRemaining.postValue(d); timerHandler.post(musicTimerRunnable);
+
+    public void startMusicSleepTimer(long duration, long fade) {
+        timerHandler.removeCallbacks(musicTimerRunnable);
+        musicBaseVolume = player.getVolume();
+        musicInitialDuration = duration;
+        musicEndTime = SystemClock.elapsedRealtime() + duration;
+        musicFadeDuration = fade;
+        musicTimerRemaining.postValue(duration);
+        timerHandler.post(musicTimerRunnable);
     }
-    public void pauseMusicSleepTimer() { if (musicTimerRemaining.getValue() != null) { isMusicTimerPaused = true; musicTimerRemaining.postValue(musicEndTime - SystemClock.elapsedRealtime()); timerHandler.removeCallbacks(musicTimerRunnable); } }
-    public void resumeMusicSleepTimer() { Long r = musicTimerRemaining.getValue(); if (r != null && r > 0) { isMusicTimerPaused = false; musicEndTime = SystemClock.elapsedRealtime() + r; timerHandler.post(musicTimerRunnable); } }
+
+    public void pauseMusicSleepTimer() {
+        if (musicTimerRemaining.getValue() != null) {
+            isMusicTimerPaused = true;
+            musicTimerRemaining.postValue(musicEndTime - SystemClock.elapsedRealtime());
+            timerHandler.removeCallbacks(musicTimerRunnable);
+        }
+    }
+
+    public void resumeMusicSleepTimer() {
+        Long remaining = musicTimerRemaining.getValue();
+        if (remaining != null && remaining > 0) {
+            isMusicTimerPaused = false;
+            musicEndTime = SystemClock.elapsedRealtime() + remaining;
+            timerHandler.post(musicTimerRunnable);
+        }
+    }
+
     public void resetMusicSleepTimer() { startMusicSleepTimer(musicInitialDuration, musicFadeDuration); }
+
     public boolean getMusicTimerPaused() { return isMusicTimerPaused; }
+
     public LiveData<Long> getMusicTimerRemaining() { return musicTimerRemaining; }
-    public void startAmbienceSleepTimer(long d, long f) {
-        timerHandler.removeCallbacks(ambienceTimerRunnable); ambienceBaseVolume = ambiencePlayer.getVolume();
-        ambienceInitialDuration = d; ambienceEndTime = SystemClock.elapsedRealtime() + d; ambienceFadeDuration = f;
-        ambienceTimerRemaining.postValue(d); timerHandler.post(ambienceTimerRunnable);
+
+    public void startAmbienceSleepTimer(long duration, long fade) {
+        timerHandler.removeCallbacks(ambienceTimerRunnable);
+        ambienceBaseVolume = ambiencePlayer.getVolume();
+        ambienceInitialDuration = duration;
+        ambienceEndTime = SystemClock.elapsedRealtime() + duration;
+        ambienceFadeDuration = fade;
+        ambienceTimerRemaining.postValue(duration);
+        timerHandler.post(ambienceTimerRunnable);
     }
-    public void pauseAmbienceSleepTimer() { if (ambienceTimerRemaining.getValue() != null) { isAmbienceTimerPaused = true; ambienceTimerRemaining.postValue(ambienceEndTime - SystemClock.elapsedRealtime()); timerHandler.removeCallbacks(ambienceTimerRunnable); } }
-    public void resumeAmbienceSleepTimer() { Long r = ambienceTimerRemaining.getValue(); if (r != null && r > 0) { isAmbienceTimerPaused = false; ambienceEndTime = SystemClock.elapsedRealtime() + r; timerHandler.post(ambienceTimerRunnable); } }
+
+    public void pauseAmbienceSleepTimer() {
+        if (ambienceTimerRemaining.getValue() != null) {
+            isAmbienceTimerPaused = true;
+            ambienceTimerRemaining.postValue(ambienceEndTime - SystemClock.elapsedRealtime());
+            timerHandler.removeCallbacks(ambienceTimerRunnable);
+        }
+    }
+
+    public void resumeAmbienceSleepTimer() {
+        Long remaining = ambienceTimerRemaining.getValue();
+        if (remaining != null && remaining > 0) {
+            isAmbienceTimerPaused = false;
+            ambienceEndTime = SystemClock.elapsedRealtime() + remaining;
+            timerHandler.post(ambienceTimerRunnable);
+        }
+    }
     public void resetAmbienceSleepTimer() { startAmbienceSleepTimer(ambienceInitialDuration, ambienceFadeDuration); }
+
     public boolean getAmbienceTimerPaused() { return isAmbienceTimerPaused; }
+
     public LiveData<Long> getAmbienceTimerRemaining() { return ambienceTimerRemaining; }
 
     @Override

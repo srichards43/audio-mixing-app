@@ -173,6 +173,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppPreferences.applyTheme(this);
+        AppPreferences.applyColor(this);
 
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);

@@ -30,6 +30,7 @@ public class SettingsActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> ambientDirectoryPickLauncher;
 
     private Spinner themeSpinner;
+    private Spinner colorSpinner;
     private Spinner launchTabSpinner;
     private SwitchCompat ambientDiskRotationSwitch;
     private Button songPathButton;
@@ -38,6 +39,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppPreferences.applyTheme(this);
+        AppPreferences.applyColor(this);
 
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
@@ -81,19 +83,48 @@ public class SettingsActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        ConstraintLayout colorRow = this.findViewById(R.id.colorRow);
+        colorSpinner = this.findViewById(R.id.colorSpinner);
+
+        ArrayAdapter<CharSequence> colorAdapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.color_options,
+                android.R.layout.simple_spinner_item
+        );
+        colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        colorSpinner.setAdapter(colorAdapter);
+
+        colorSpinner.setSelection(AppPreferences.getColorIndex(this));
+
+        colorRow.setOnClickListener(v -> colorSpinner.performClick());
+
+        colorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position != AppPreferences.getColorIndex(SettingsActivity.this)) {
+                    AppPreferences.setColorIndex(SettingsActivity.this, position);
+                    AppPreferences.applyColor(SettingsActivity.this);
+                    recreate(); // Restart activity to show new theme
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
 
         ConstraintLayout launchTabRow = this.findViewById(R.id.launchTabRow);
         launchTabSpinner = this.findViewById(R.id.launchTabSpinner);
 
         // Load launch tab selection spinner
-        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(
+        ArrayAdapter<CharSequence> launchTabAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.launch_options,
                 android.R.layout.simple_spinner_item
         );
 
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        launchTabSpinner.setAdapter(adapter2);
+        launchTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        launchTabSpinner.setAdapter(launchTabAdapter);
         launchTabSpinner.setSelection(AppPreferences.getLaunchTab(this));
 
         launchTabRow.setOnClickListener(v -> launchTabSpinner.performClick());
@@ -193,6 +224,7 @@ public class SettingsActivity extends AppCompatActivity {
             AppPreferences.resetAll(this);
 
             themeSpinner.setSelection(0);
+            colorSpinner.setSelection(0);
             launchTabSpinner.setSelection(1);
             ambientDiskRotationSwitch.setChecked(true);
             songPathButton.setText(R.string.settings_path_button);
