@@ -38,8 +38,9 @@
     <string name="settings_launch_tab">Tab to launch with:</string>
 
     <string name="settings_audio_h">Audio</string>
-    <string name="settings_song_path">Choose music directory:</string>
-    <string name="settings_ambient_path">New ambient directory:</string>
+    <string name="settings_scan_songs">Scan all files for songs:</string>"
+    <string name="settings_song_path">Music directory:</string>
+    <string name="settings_ambient_path">Add ambient directory:</string>
     <string name="settings_path_button">Path</string>
 
     <string name="settings_reset_button">Reset settings to default</string>
@@ -108,5 +109,10 @@
     <string name="ambient_disk_hole_cd">Ambient disk hole</string>
     <string name="ambient_pause_cd">Ambient disk paused</string>
     <string name="drag_handle_cd">Drag Handle</string>
+    <string name="loop_button_cd">Loop Toggle</string>
+    <string name="reset_icon_cd">Reset Icon</string>
+    <string name="chevron_cd">Open Tab Icon</string>
+    <string name="power_icon_cd">Power Icon</string>
+    <string name="error_icon_cd">Error Icon</string>
 
 </resources>

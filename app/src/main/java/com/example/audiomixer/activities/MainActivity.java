@@ -1,10 +1,12 @@
 package com.example.audiomixer.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -23,9 +25,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -42,6 +47,7 @@ import com.example.audiomixer.fragments.QueueFragment;
 import com.example.audiomixer.fragments.SongFragment;
 import com.example.audiomixer.objects.AudioFile;
 import com.example.audiomixer.services.PlaybackService;
+import com.example.audiomixer.utils.AlbumCoverLoader;
 import com.example.audiomixer.utils.AppPreferences;
 import com.example.audiomixer.utils.TimeUtility;
 import com.google.android.material.card.MaterialCardView;
@@ -80,6 +86,14 @@ public class MainActivity extends AppCompatActivity
     private int colorDefault;
 
     public final MutableLiveData<PlaybackService> serviceLiveData = new MutableLiveData<>(); // for fragments to observe
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // Notify fragments or re-trigger scan if needed
+                    serviceLiveData.postValue(playbackService); 
+                }
+            });
 
 
 
@@ -133,12 +147,16 @@ public class MainActivity extends AppCompatActivity
                     isAmbientButtonOpen = false;
                 } else {
                     openAmbientDisc();
-                    if (ambient.getAlbumCover() != null) {
-                        Bitmap bmp = BitmapFactory.decodeByteArray(ambient.getAlbumCover(), 0, ambient.getAlbumCover().length);
-                        ambientCoverImg.setImageBitmap(bmp);
-                    } else {
-                        ambientCoverImg.setImageResource(R.drawable.shape_circle);
-                    }
+                    // Load art asynchronously
+                    AlbumCoverLoader.load(MainActivity.this, ambient.getFilePath(), bitmap -> {
+                        runOnUiThread(() -> {
+                            if (bitmap != null) {
+                                ambientCoverImg.setImageBitmap(bitmap);
+                            } else {
+                                ambientCoverImg.setImageResource(R.drawable.shape_circle);
+                            }
+                        });
+                    });
                 }
             });
 
@@ -178,6 +196,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        checkPermissions();
 
         // Get colorPrimary from theme
         TypedValue typedValue = new TypedValue();
@@ -323,6 +343,15 @@ public class MainActivity extends AppCompatActivity
         spinAmbientDisc = AppPreferences.getAmbientDiscRotation(this);
     }
 
+    private void checkPermissions() {
+        String permission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ?
+                Manifest.permission.READ_MEDIA_AUDIO : Manifest.permission.READ_EXTERNAL_STORAGE;
+
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(permission);
+        }
+    }
+
     /**
      * Switch between song panel opening and closing
      */
@@ -442,13 +471,16 @@ public class MainActivity extends AppCompatActivity
         songDurationText.append(TimeUtility.getFormattedDuration(duration));
         songCurrentTimeText.setText(TimeUtility.getFormattedDuration((int) songPos));
 
-        if (song.getAlbumCover() != null) {
-            Bitmap bmp = BitmapFactory.decodeByteArray(song.getAlbumCover(), 0, song.getAlbumCover().length);
-            songAlbumCover.setImageBitmap(bmp);
-        } else {
-            // Show default album placeholder
-            songAlbumCover.setImageResource(android.R.drawable.ic_menu_report_image);
-        }
+        // Load art asynchronously
+        AlbumCoverLoader.load(this, song.getFilePath(), bitmap -> {
+            runOnUiThread(() -> {
+                if (bitmap != null) {
+                    songAlbumCover.setImageBitmap(bitmap);
+                } else {
+                    songAlbumCover.setImageResource(android.R.drawable.ic_menu_report_image);
+                }
+            });
+        });
     }
 
     /**
@@ -545,12 +577,16 @@ public class MainActivity extends AppCompatActivity
             spinAmbientDisc();
             ambientPauseIcon.setVisibility(View.GONE);
 
-            if (ambient.getAlbumCover() != null) {
-                Bitmap bmp = BitmapFactory.decodeByteArray(ambient.getAlbumCover(), 0, ambient.getAlbumCover().length);
-                ambientCoverImg.setImageBitmap(bmp);
-            } else {
-                ambientCoverImg.setImageResource(R.drawable.shape_circle);
-            }
+            // Load art asynchronously
+            AlbumCoverLoader.load(this, ambient.getFilePath(), bitmap -> {
+                runOnUiThread(() -> {
+                    if (bitmap != null) {
+                        ambientCoverImg.setImageBitmap(bitmap);
+                    } else {
+                        ambientCoverImg.setImageResource(R.drawable.shape_circle);
+                    }
+                });
+            });
         }
 
     }

@@ -13,7 +13,6 @@ public class AppPreferences {
     private static final String THEME_INDEX_KEY = "theme_index";
     private static final String COLOR_INDEX_KEY = "color_index";
     private static final String LAUNCH_TAB_KEY = "launch_tab";
-    private static final String MUSIC_DIRECTORY_URI_KEY = "music_directory_uri";
     private static final String AMBIENT_DIRECTORY_URI_KEY = "ambient_directory_uri";
     private static final String AMBIENT_DISC_ROTATION_KEY = "ambient_disc_rotation";
 
@@ -90,7 +89,6 @@ public class AppPreferences {
         prefs.edit().putInt(LAUNCH_TAB_KEY, index).apply();
     }
 
-
     public static void setAmbientDiscRotation(Context context, boolean enabled) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putBoolean(AMBIENT_DISC_ROTATION_KEY, enabled).apply();
@@ -99,36 +97,6 @@ public class AppPreferences {
     public static boolean getAmbientDiscRotation(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return prefs.getBoolean(AMBIENT_DISC_ROTATION_KEY, true);
-    }
-
-    public static void setMusicDirectoryUri(Context context, Uri uri) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(MUSIC_DIRECTORY_URI_KEY, uri.toString()).apply();
-    }
-
-    public static Uri getMusicDirectoryUri(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String uriString = prefs.getString(MUSIC_DIRECTORY_URI_KEY, null);
-        if (uriString == null) {
-            return null;
-        } else {
-            return Uri.parse(uriString);
-        }
-    }
-
-    public static void setAmbientDirectoryUri(Context context, Uri uri) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(AMBIENT_DIRECTORY_URI_KEY, uri.toString()).apply();
-    }
-
-    public static Uri getAmbientDirectoryUri(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String uriString = prefs.getString(AMBIENT_DIRECTORY_URI_KEY, null);
-        if (uriString == null) {
-            return null;
-        } else {
-            return Uri.parse(uriString);
-        }
     }
 
     public static void resetAll(Context context) {

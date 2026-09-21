@@ -37,8 +37,8 @@ public class AmbientAdapterTest {
         when(theme.resolveAttribute(anyInt(), any(TypedValue.class), anyBoolean())).thenReturn(true);
 
         testAmbients = Arrays.asList(
-                new AudioFile("Rain", "", "", 0, "path1", null, 0),
-                new AudioFile("Waves", "", "", 0, "path2", null, 0)
+                new AudioFile("Rain", "", "", 0, "path1",  0),
+                new AudioFile("Waves", "", "", 0, "path2",  0)
         );
 
         // Spy on adapter and ignore notifyDatasetChanged

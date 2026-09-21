@@ -52,12 +52,4 @@ public class AppPreferencesTest {
         verify(editor).apply();
     }
 
-    @Test
-    public void testGetMusicDirectoryUri_ReturnsNullWhenEmpty() {
-        when(sharedPrefs.getString(eq("music_directory_uri"), any())).thenReturn(null);
-
-        android.net.Uri result = AppPreferences.getMusicDirectoryUri(context);
-        assertEquals(null, result);
-    }
-
 }

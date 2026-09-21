@@ -1,14 +1,11 @@
 package com.example.audiomixer.services;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -30,6 +27,8 @@ import androidx.media3.exoplayer.ExoPlayer;
 import com.example.audiomixer.R;
 import com.example.audiomixer.activities.MainActivity;
 import com.example.audiomixer.objects.AudioFile;
+import com.example.audiomixer.utils.AlbumCoverLoader;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -168,6 +167,9 @@ public class PlaybackService extends Service {
         player.addListener(new ExoPlayer.Listener() {
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
+                // If between loading songs don't flicker pause
+                if (!isPlaying && player.getPlaybackState() == ExoPlayer.STATE_BUFFERING) return;
+
                 isPlayingInternal.postValue(isPlaying);
                 updatePlaybackState();
                 if (isPlaying) startUpdatingPositionInSong();
@@ -292,22 +294,33 @@ public class PlaybackService extends Service {
     @VisibleForTesting
     public void updateMusicNotification() {
         AudioFile song = getCurrentSong();
-        if (song == null) return;
         
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC).setSmallIcon(R.drawable.ic_music).setOngoing(true);
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.ic_music)
+                .setOngoing(true);
 
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        
-        builder.setContentTitle(song.getTitle()).setContentText(song.getArtist()).setContentIntent(contentIntent)
-            .addAction(R.drawable.ic_skip_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
-            .addAction(isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play, "Toggle", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
-            .addAction(R.drawable.ic_skip_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
-            .addAction(R.drawable.ic_close, "Close", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP))
-            .setStyle(new androidx.media.app.NotificationCompat.MediaStyle().setMediaSession(musicMediaSession.getSessionToken()).setShowActionsInCompactView(1, 2, 3));
+        builder.setContentIntent(contentIntent);
 
-        if (song.getAlbumCover() != null) builder.setLargeIcon(BitmapFactory.decodeByteArray(song.getAlbumCover(), 0, song.getAlbumCover().length));
+        if (song == null) {
+            // Placeholder
+            builder.setContentTitle("Music Player")
+                   .setContentText("Waiting for audio...");
+        } else {
+            builder.setContentTitle(song.getTitle())
+                   .setContentText(song.getArtist())
+                   .addAction(R.drawable.ic_skip_previous, "Previous", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+                   .addAction(isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play, "Toggle", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY_PAUSE))
+                   .addAction(R.drawable.ic_skip_next, "Next", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                   .addAction(R.drawable.ic_close, "Close", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP))
+                   .setStyle(new androidx.media.app.NotificationCompat.MediaStyle().setMediaSession(musicMediaSession.getSessionToken()).setShowActionsInCompactView(1, 2, 3));
+
+            Bitmap cover = AlbumCoverLoader.getArt(this, song.getFilePath());
+            if (cover != null) builder.setLargeIcon(cover);
+        }
+        
         startForeground(NOTIFICATION_ID_MUSIC, builder.build());
     }
 
@@ -323,7 +336,8 @@ public class PlaybackService extends Service {
                 .addAction(R.drawable.ic_close, "Close", MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP))
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle().setMediaSession(ambienceMediaSession.getSessionToken()).setShowActionsInCompactView(0, 1));
 
-        if (ambient.getAlbumCover() != null) builder.setLargeIcon(BitmapFactory.decodeByteArray(ambient.getAlbumCover(), 0, ambient.getAlbumCover().length));
+        Bitmap cover = AlbumCoverLoader.getArt(this, ambient.getFilePath());
+        if (cover != null) builder.setLargeIcon(cover);
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID_AMBIENT, builder.build());
     }
 

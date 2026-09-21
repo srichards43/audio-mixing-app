@@ -44,9 +44,9 @@ public class PlaybackServiceTest {
 
         // Dummy data
         List<AudioFile> songs = new ArrayList<>();
-        songs.add(new AudioFile("Song A", "Artist", "Album", 0, "pathA", null, 1000));
-        songs.add(new AudioFile("Song B", "Artist", "Album", 0, "pathB", null, 2000));
-        songs.add(new AudioFile("Song C", "Artist", "Album", 0, "pathC", null, 3000));
+        songs.add(new AudioFile("Song A", "Artist", "Album", 0, "pathA", 1000));
+        songs.add(new AudioFile("Song B", "Artist", "Album", 0, "pathB", 2000));
+        songs.add(new AudioFile("Song C", "Artist", "Album", 0, "pathC", 3000));
 
         service.setPlaylist(songs, 0);
     }

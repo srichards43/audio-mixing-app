@@ -15,8 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
@@ -26,15 +24,12 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private ActivityResultLauncher<Intent> songDirectoryPickLauncher;
     private ActivityResultLauncher<Intent> ambientDirectoryPickLauncher;
 
     private Spinner themeSpinner;
     private Spinner colorSpinner;
     private Spinner launchTabSpinner;
     private SwitchCompat ambientDiskRotationSwitch;
-    private Button songPathButton;
-    private Button ambientPathButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,191 +48,86 @@ public class SettingsActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        ConstraintLayout themeRow = this.findViewById(R.id.themeRow);
-        themeSpinner = this.findViewById(R.id.themeSpinner);
-
-        // Load theme selection spinner
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.theme_options,
-                android.R.layout.simple_spinner_item
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        themeSpinner.setAdapter(adapter);
-
+        // Theme selection
+        themeSpinner = findViewById(R.id.themeSpinner);
+        ArrayAdapter<CharSequence> themeAdapter = ArrayAdapter.createFromResource(
+                this, R.array.theme_options, android.R.layout.simple_spinner_item);
+        themeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        themeSpinner.setAdapter(themeAdapter);
         themeSpinner.setSelection(AppPreferences.getThemeIndex(this));
 
-        themeRow.setOnClickListener(v -> themeSpinner.performClick());
-
+        findViewById(R.id.themeRow).setOnClickListener(v -> themeSpinner.performClick());
         themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != AppPreferences.getThemeIndex(SettingsActivity.this)) {
                     AppPreferences.setThemeIndex(SettingsActivity.this, position);
                     AppPreferences.applyTheme(SettingsActivity.this);
-                    recreate(); // Restart activity to show new theme
+                    recreate();
                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        ConstraintLayout colorRow = this.findViewById(R.id.colorRow);
-        colorSpinner = this.findViewById(R.id.colorSpinner);
-
+        // Color selection
+        colorSpinner = findViewById(R.id.colorSpinner);
         ArrayAdapter<CharSequence> colorAdapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.color_options,
-                android.R.layout.simple_spinner_item
-        );
+                this, R.array.color_options, android.R.layout.simple_spinner_item);
         colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         colorSpinner.setAdapter(colorAdapter);
-
         colorSpinner.setSelection(AppPreferences.getColorIndex(this));
 
-        colorRow.setOnClickListener(v -> colorSpinner.performClick());
-
+        findViewById(R.id.colorRow).setOnClickListener(v -> colorSpinner.performClick());
         colorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != AppPreferences.getColorIndex(SettingsActivity.this)) {
                     AppPreferences.setColorIndex(SettingsActivity.this, position);
                     AppPreferences.applyColor(SettingsActivity.this);
-                    recreate(); // Restart activity to show new theme
+                    recreate();
                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-
-        ConstraintLayout launchTabRow = this.findViewById(R.id.launchTabRow);
-        launchTabSpinner = this.findViewById(R.id.launchTabSpinner);
-
-        // Load launch tab selection spinner
-        ArrayAdapter<CharSequence> launchTabAdapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.launch_options,
-                android.R.layout.simple_spinner_item
-        );
-
-        launchTabAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        launchTabSpinner.setAdapter(launchTabAdapter);
+        // Launch tab selection
+        launchTabSpinner = findViewById(R.id.launchTabSpinner);
+        ArrayAdapter<CharSequence> launchAdapter = ArrayAdapter.createFromResource(
+                this, R.array.launch_options, android.R.layout.simple_spinner_item);
+        launchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        launchTabSpinner.setAdapter(launchAdapter);
         launchTabSpinner.setSelection(AppPreferences.getLaunchTab(this));
 
-        launchTabRow.setOnClickListener(v -> launchTabSpinner.performClick());
-
+        findViewById(R.id.launchTabRow).setOnClickListener(v -> launchTabSpinner.performClick());
         launchTabSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != AppPreferences.getLaunchTab(SettingsActivity.this)) {
-                    AppPreferences.setLaunchTab(SettingsActivity.this, position);
-                }
+                AppPreferences.setLaunchTab(SettingsActivity.this, position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-
-        ConstraintLayout songPathRow = this.findViewById(R.id.songPathRow);
-        songPathButton = this.findViewById(R.id.songPathButton);
-        // Load path button text
-        Uri savedUri = AppPreferences.getMusicDirectoryUri(this);
-        if (savedUri != null) {
-            songPathButton.setText(savedUri.toString());
-        }
-        songDirectoryPickLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getData() != null && result.getResultCode() == RESULT_OK) {
-                        Uri uri = result.getData().getData();
-
-                        // Make permissions persist when app closed
-                        assert uri != null;
-                        getContentResolver().takePersistableUriPermission(
-                                uri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        );
-
-                        AppPreferences.setMusicDirectoryUri(this, uri);
-                        songPathButton.setText(uri.toString());
-                    }
-                }
-        );
-        songPathRow.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            songDirectoryPickLauncher.launch(intent);
-        });
-
-        ConstraintLayout ambientPathRow = this.findViewById(R.id.ambientPathRow);
-        ambientPathButton = this.findViewById(R.id.ambientPathButton);
-        // Load path button text
-        Uri savedAmbientUri = AppPreferences.getAmbientDirectoryUri(this);
-        if (savedAmbientUri != null) {
-            ambientPathButton.setText(savedAmbientUri.toString());
-        }
-        ambientDirectoryPickLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getData() != null && result.getResultCode() == RESULT_OK) {
-                        Uri uri = result.getData().getData();
-
-                        // Make permissions persist when app closed
-                        assert uri != null;
-                        getContentResolver().takePersistableUriPermission(
-                                uri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        );
-
-                        AppPreferences.setAmbientDirectoryUri(this, uri);
-                        ambientPathButton.setText(uri.toString());
-                    }
-                }
-        );
-        ambientPathRow.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            ambientDirectoryPickLauncher.launch(intent);
-        });
-
-
-        ConstraintLayout ambientDiskRotationRow = this.findViewById(R.id.ambientDiskRotationRow);
-        ambientDiskRotationSwitch = this.findViewById(R.id.ambientDiskRotationSwitch);
-
-        ambientDiskRotationRow.setOnClickListener(v -> {
-                ambientDiskRotationSwitch.toggle();
-        });
+        // Ambient disk rotation toggle
+        ambientDiskRotationSwitch = findViewById(R.id.ambientDiskRotationSwitch);
         ambientDiskRotationSwitch.setChecked(AppPreferences.getAmbientDiscRotation(this));
-        ambientDiskRotationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            AppPreferences.setAmbientDiscRotation(this, isChecked);
-        });
+        findViewById(R.id.ambientDiskRotationRow).setOnClickListener(v -> ambientDiskRotationSwitch.toggle());
+        ambientDiskRotationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> 
+            AppPreferences.setAmbientDiscRotation(SettingsActivity.this, isChecked));
 
-        Button resetButton = findViewById(R.id.resetButton);
-        resetButton.setOnClickListener(v -> {
+        // Reset button
+        findViewById(R.id.resetButton).setOnClickListener(v -> {
             AppPreferences.resetAll(this);
-
-            themeSpinner.setSelection(0);
-            colorSpinner.setSelection(0);
-            launchTabSpinner.setSelection(1);
-            ambientDiskRotationSwitch.setChecked(true);
-            songPathButton.setText(R.string.settings_path_button);
-            ambientPathButton.setText(R.string.settings_path_button);
-
-            AppPreferences.applyTheme(this);
             recreate();
         });
 
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(insets.getInsets(WindowInsetsCompat.Type.systemBars()).left, 
+                    insets.getInsets(WindowInsetsCompat.Type.systemBars()).top, 
+                    insets.getInsets(WindowInsetsCompat.Type.systemBars()).right, 
+                    insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom);
             return insets;
         });
     }

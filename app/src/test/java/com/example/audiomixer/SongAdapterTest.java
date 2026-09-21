@@ -36,8 +36,8 @@ public class SongAdapterTest {
         when(theme.resolveAttribute(anyInt(), any(TypedValue.class), anyBoolean())).thenReturn(true);
 
         testSongs = Arrays.asList(
-                new AudioFile("Red", "Artist A", "Album X", 100, "path1", null, 2000),
-                new AudioFile("Blue", "Artist B", "Album Y", 200, "path2", null, 1000)
+                new AudioFile("Red", "Artist A", "Album X", 100, "path1", 2000),
+                new AudioFile("Blue", "Artist B", "Album Y", 200, "path2", 1000)
         );
 
         // Spy on adapter and ignore notifyDatasetChanged

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.objects.AudioFile;
+import com.example.audiomixer.utils.AlbumCoverLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,13 +65,19 @@ public class AmbientAdapter extends RecyclerView.Adapter<AmbientAdapter.AmbientV
 
         holder.title.setText(ambient.getTitle());
 
-        if (ambient.getAlbumCover() != null) {
-            Bitmap bmp = BitmapFactory.decodeByteArray(ambient.getAlbumCover(), 0, ambient.getAlbumCover().length);
-            holder.cover.setImageBitmap(bmp);
-        } else {
-            // Show default album placeholder
-            holder.cover.setImageResource(android.R.drawable.ic_menu_report_image);
-        }
+        // Asynchronous image loading using centralized loader
+        holder.cover.setImageResource(R.drawable.shape_circle);
+        holder.cover.setTag(ambientPath);
+
+        AlbumCoverLoader.load(holder.itemView.getContext(), ambientPath, bitmap -> {
+            holder.itemView.post(() -> {
+                if (ambientPath.equals(holder.cover.getTag())) {
+                    if (bitmap != null) {
+                        holder.cover.setImageBitmap(bitmap);
+                    }
+                }
+            });
+        });
 
         holder.itemView.setOnClickListener(v -> {
             listener.onAmbientClick(ambient);

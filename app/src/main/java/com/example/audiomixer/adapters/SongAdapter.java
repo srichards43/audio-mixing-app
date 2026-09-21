@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.audiomixer.R;
 import com.example.audiomixer.objects.AudioFile;
+import com.example.audiomixer.utils.AlbumCoverLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,13 +80,20 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
         holder.duration.setText(song.getFormattedDuration());
 
-        if (song.getAlbumCover() != null) {
-            Bitmap bmp = BitmapFactory.decodeByteArray(song.getAlbumCover(), 0, song.getAlbumCover().length);
-            holder.albumCover.setImageBitmap(bmp);
-        } else {
-            // Show default album placeholder
-            holder.albumCover.setImageResource(android.R.drawable.ic_menu_report_image);
-        }
+        holder.albumCover.setImageResource(android.R.drawable.ic_menu_report_image);
+
+        holder.albumCover.setTag(songPath);
+
+        // Load album covers asynchronously
+        AlbumCoverLoader.load(holder.itemView.getContext(), songPath, bitmap -> {
+            holder.itemView.post(() -> {
+                if (songPath.equals(holder.albumCover.getTag())) {
+                    if (bitmap != null) {
+                        holder.albumCover.setImageBitmap(bitmap);
+                    }
+                }
+            });
+        });
 
         holder.itemView.setOnClickListener(v -> {
             listener.onPlayClick(position);

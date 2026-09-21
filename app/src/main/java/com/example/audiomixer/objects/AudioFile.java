@@ -2,7 +2,6 @@ package com.example.audiomixer.objects;
 
 import com.example.audiomixer.utils.TimeUtility;
 
-import java.io.File;
 import java.util.Objects;
 
 public class AudioFile {
@@ -10,17 +9,15 @@ public class AudioFile {
     private final String artist;
     private final String album;
     private final long duration;
-    private final byte[] albumCover;
     private final String filePath;
     private final long createdAt;
 
-    public AudioFile(String title, String artist, String album, long duration, String filePath, byte[] albumCover, long createdAt) {
+    public AudioFile(String title, String artist, String album, long duration, String filePath, long createdAt) {
         this.title = Objects.requireNonNullElse(title, "Unknown");
         this.artist = Objects.requireNonNullElse(artist, "Unknown");
         this.album = Objects.requireNonNullElse(album, "Unknown");
         this.duration = duration;
         this.filePath = Objects.requireNonNull(filePath);
-        this.albumCover = albumCover;
         this.createdAt = createdAt;
     }
 
@@ -50,7 +47,4 @@ public class AudioFile {
     }
     public long getCreatedAt() { return createdAt; }
 
-    public byte[] getAlbumCover() {
-        return albumCover;
-    }
 }
