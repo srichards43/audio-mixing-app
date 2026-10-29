@@ -10,6 +10,7 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -187,7 +188,7 @@ public class SleepTimersFragment extends BottomSheetDialogFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         ((MainActivity)requireActivity()).serviceLiveData.observe(getViewLifecycleOwner(), playbackService -> {

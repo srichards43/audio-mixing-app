@@ -7,11 +7,9 @@
     <color name="secondaryMenuBar">#E2E2E2</color>
     <color name="primary">#FF2600</color> <!-- todo: duplicates, remove -->
     <color name="secondary">#D52F00</color>
-    <color name="textForPrimary">#FFFFFF</color>
     <color name="sleep">#443186</color>
     <color name="positive">#358327</color>
     <color name="negative">#941E1E</color>
-    <color name="disabled">#797F7F7F</color>
 
     <color name="primary_green">#04E200</color>
     <color name="secondary_green">#33B600</color>

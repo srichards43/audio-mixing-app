@@ -1,13 +1,11 @@
 package com.example.audiomixer;
 
-import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.TypedValue;
 
 import com.example.audiomixer.adapters.AmbientAdapter;
-import com.example.audiomixer.adapters.SongAdapter;
 import com.example.audiomixer.objects.AudioFile;
 
 import org.junit.Before;

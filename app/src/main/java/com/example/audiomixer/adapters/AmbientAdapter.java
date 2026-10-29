@@ -2,8 +2,6 @@ package com.example.audiomixer.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,15 +67,13 @@ public class AmbientAdapter extends RecyclerView.Adapter<AmbientAdapter.AmbientV
         holder.cover.setImageResource(R.drawable.shape_circle);
         holder.cover.setTag(ambientPath);
 
-        AlbumCoverLoader.load(holder.itemView.getContext(), ambientPath, bitmap -> {
-            holder.itemView.post(() -> {
-                if (ambientPath.equals(holder.cover.getTag())) {
-                    if (bitmap != null) {
-                        holder.cover.setImageBitmap(bitmap);
-                    }
+        AlbumCoverLoader.load(holder.itemView.getContext(), ambientPath, bitmap -> holder.itemView.post(() -> {
+            if (ambientPath.equals(holder.cover.getTag())) {
+                if (bitmap != null) {
+                    holder.cover.setImageBitmap(bitmap);
                 }
-            });
-        });
+            }
+        }));
 
         holder.itemView.setOnClickListener(v -> {
             listener.onAmbientClick(ambient);

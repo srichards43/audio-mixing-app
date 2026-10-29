@@ -2,7 +2,6 @@ package com.example.audiomixer.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -13,7 +12,6 @@ public class AppPreferences {
     private static final String THEME_INDEX_KEY = "theme_index";
     private static final String COLOR_INDEX_KEY = "color_index";
     private static final String LAUNCH_TAB_KEY = "launch_tab";
-    private static final String AMBIENT_DIRECTORY_URI_KEY = "ambient_directory_uri";
     private static final String AMBIENT_DISC_ROTATION_KEY = "ambient_disc_rotation";
 
     public static int getThemeIndex(Context context) {

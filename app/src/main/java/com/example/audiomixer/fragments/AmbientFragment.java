@@ -4,11 +4,9 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,7 +21,6 @@ import com.example.audiomixer.R;
 import com.example.audiomixer.activities.MainActivity;
 import com.example.audiomixer.adapters.AmbientAdapter;
 import com.example.audiomixer.objects.AudioFile;
-import com.example.audiomixer.utils.AppPreferences;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,7 +91,7 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         // Observe once service is live
@@ -158,17 +155,6 @@ public class AmbientFragment extends Fragment implements AmbientAdapter.OnAmbien
         return audioFiles;
     }
 
-    private boolean isMetadata(String metadata) {
-        return metadata != null && !metadata.isEmpty();
-    }
-
-    /**
-     * Update the currently playing song in the adapter, called from MainActivity
-     * @param songPath path of the song playing
-     */
-    public void updateCurrentSong(String songPath) {
-        ambientAdapter.setCurrentlyPlaying(songPath);
-    }
 
     /**
      * Get playlist from adapter and send to mainActivity with position

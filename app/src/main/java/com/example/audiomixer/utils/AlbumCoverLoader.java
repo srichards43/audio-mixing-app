@@ -34,8 +34,7 @@ public class AlbumCoverLoader {
         // Get image from mediaStore if possible, more performant
         if (path.startsWith("content://") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
-                Bitmap thumb = context.getContentResolver().loadThumbnail(uri, new Size(300, 300), null);
-                if (thumb != null) return thumb;
+                return context.getContentResolver().loadThumbnail(uri, new Size(300, 300), null);
             } catch (Exception ignored) {
                 // Fall through if fail
             }
